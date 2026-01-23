@@ -428,9 +428,9 @@ class BillingController extends Controller
 
         // Hospital information
         $hospital_info = [
-            'name' => 'Challenger Vet Animal Hospital',
+            'name' => 'Glow Up Skin Care & Cosmetics',
             'address' => 'Kottawa, Sri Lanka',
-            'phone' => '011-2197400'
+            'phone' => '070-3843481'
         ];
 
         // Prepare data for the view
@@ -477,9 +477,9 @@ class BillingController extends Controller
         }
 
         $hospital_info = [
-            'name' => 'Challenger Vet Animal Hospital',
+            'name' => 'Glow Up Skin Care & Cosmetics',
             'address' => 'Kottawa, Sri Lanka',
-            'phone' => '011-2197400'
+            'phone' => '070-3843481'
         ];
 
         $data = [
@@ -514,9 +514,9 @@ class BillingController extends Controller
         $prescription_details = Prescription::where('trement_id', $billing_data->treatment_id)->get();
         // Hospital information
         $hospital_info = [
-            'name' => 'Challenger Vet Animal Hospital',
+            'name' => 'Glow Up Skin Care & Cosmetics',
             'address' => 'Kottawa, Sri Lanka',
-            'phone' => '011-2197400'
+            'phone' => '070-3843481'
         ];
 
         // Prepare data for the view
