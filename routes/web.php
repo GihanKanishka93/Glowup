@@ -45,8 +45,9 @@ Auth::routes();
 
 Route::group(['middleware' => ['auth']], function () {
 
-    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-    Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('dashbord');
+    Route::get('/home', [BillingController::class, 'create'])->name('home');
+    Route::get('/', [BillingController::class, 'create'])->name('dashbord');
+    Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->name('dashboard');
     //Route::get('/print', [App\Http\Controllers\HomeController::class, 'print'])->name('print');
 
     Route::post('ui/theme', [UserPreferenceController::class, 'updateTheme'])->name('ui.theme');

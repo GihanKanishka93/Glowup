@@ -122,6 +122,14 @@
             'label' => 'Dashboard',
             'items' => [
                 [
+                    'label' => 'Dashboard Overview',
+                    'icon' => 'fas fa-chart-pie',
+                    'route' => route('dashboard'),
+                    'active' => request()->routeIs('dashboard'),
+                    'badge' => 0,
+                    'badge_context' => 'info',
+                ],
+                [
                     'label' => 'Billing Workspace',
                     'icon' => 'fas fa-clipboard-check',
                     'route' => route('billing.create'),

@@ -1,6 +1,6 @@
 <?php $__env->startSection('content'); ?>
 
-<h1 class="h3 mb-2 text-gray-800">Register New Client</h1>
+    <h1 class="h3 mb-2 text-gray-800">Register New Client</h1>
 
     <div class="row">
         <div class="col-xl-12 col-lg-12">
@@ -52,8 +52,8 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>">
                                     <option value=""></option>
-                                    <option value="1" <?php if(old('gender')==1): ?> <?php if(true): echo 'selected'; endif; ?> <?php endif; ?>  >Male</option>
-                                    <option value="2" <?php if(old('gender')==2): ?> <?php if(true): echo 'selected'; endif; ?> <?php endif; ?> >Female</option>
+                                    <option value="1" <?php if(old('gender') == 1): ?> <?php if(true): echo 'selected'; endif; ?> <?php endif; ?>>Male</option>
+                                    <option value="2" <?php if(old('gender') == 2): ?> <?php if(true): echo 'selected'; endif; ?> <?php endif; ?>>Female</option>
                                 </select>
                                 <?php $__errorArgs = ['gender'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -79,8 +79,9 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" id="date_of_birth"
-                                    name="date_of_birth" value="<?php echo e(old('date_of_birth')); ?>" max="<?php echo e(date('Y-m-d')); ?>" placeholder="Date of bith">
+unset($__errorArgs, $__bag); ?>"
+                                    id="date_of_birth" name="date_of_birth" value="<?php echo e(old('date_of_birth')); ?>"
+                                    max="<?php echo e(date('Y-m-d')); ?>" placeholder="Date of bith">
                                 <?php $__errorArgs = ['date_of_birth'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -141,7 +142,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" id="nic"
-                                name="nic" value="<?php echo e(old('nic')); ?>" placeholder="NIC">
+                                    name="nic" value="<?php echo e(old('nic')); ?>" placeholder="NIC">
                                 <?php $__errorArgs = ['nic'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -168,49 +169,51 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" id="mobile_number"
-                                name="mobile_number" value="<?php echo e(old('mobile_number')); ?>" placeholder=" ">
+unset($__errorArgs, $__bag); ?>"
+                                    id="mobile_number" name="mobile_number" value="<?php echo e(old('mobile_number')); ?>"
+                                    placeholder=" ">
                                 <?php $__errorArgs = ['mobile_number'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
                                     <span class="invalid-feedback" role="alert">
-                                    <strong><?php echo e($message); ?></strong>
-                                </span>
-                            <?php unset($message);
+                                        <strong><?php echo e($message); ?></strong>
+                                    </span>
+                                <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="form-group row">
-                        <label class="col-sm-2" for="whatsapp_number">WhatsApp: </label>
-                        <div class="col-sm-8">
-                            <input type="text" class="form-control   <?php $__errorArgs = ['whatsapp_number'];
+                        <div class="form-group row">
+                            <label class="col-sm-2" for="whatsapp_number">WhatsApp: </label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control   <?php $__errorArgs = ['whatsapp_number'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" id="whatsapp_number"
-                            name="whatsapp_number" value="<?php echo e(old('whatsapp_number', '+94 ')); ?>" placeholder=" ">
-                            <?php $__errorArgs = ['whatsapp_number'];
+unset($__errorArgs, $__bag); ?>"
+                                    id="whatsapp_number" name="whatsapp_number" value="<?php echo e(old('whatsapp_number', '+94 ')); ?>"
+                                    placeholder=" ">
+                                <?php $__errorArgs = ['whatsapp_number'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-                                <span class="invalid-feedback" role="alert">
-                                    <strong><?php echo e($message); ?></strong>
-                                </span>
-                            <?php unset($message);
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong><?php echo e($message); ?></strong>
+                                    </span>
+                                <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
+                            </div>
                         </div>
-                    </div>
 
                         <div class="form-group row">
                             <label class="col-sm-2" for="owner_contact2">Address: </label>
@@ -222,8 +225,8 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" id="address"
-                                name="address" value="<?php echo e(old('address')); ?>" placeholder=" ">
+unset($__errorArgs, $__bag); ?>"
+                                    id="address" name="address" value="<?php echo e(old('address')); ?>" placeholder=" ">
                                 <?php $__errorArgs = ['address'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -250,7 +253,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" id="email"
-                                name="email" value="<?php echo e(old('email')); ?>" placeholder=" ">
+                                    name="email" value="<?php echo e(old('email')); ?>" placeholder=" ">
                                 <?php $__errorArgs = ['email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -270,6 +273,118 @@ unset($__errorArgs, $__bag); ?>
 
 
 
+                        <hr>
+                        <legend>Clinical Information</legend>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2">Medical History: </label>
+                            <div class="col-sm-8">
+                                <textarea class="form-control <?php $__errorArgs = ['basic_ilness'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                    name="basic_ilness"
+                                    placeholder="Existing medical conditions..."><?php echo e(old('basic_ilness')); ?></textarea>
+                                <?php $__errorArgs = ['basic_ilness'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong><?php echo e($message); ?></strong>
+                                    </span>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2">Surgical History: </label>
+                            <div class="col-sm-8">
+                                <textarea class="form-control <?php $__errorArgs = ['surgical_history'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                    name="surgical_history"
+                                    placeholder="Previous surgeries..."><?php echo e(old('surgical_history')); ?></textarea>
+                                <?php $__errorArgs = ['surgical_history'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong><?php echo e($message); ?></strong>
+                                    </span>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2">Allergies: </label>
+                            <div class="col-sm-8">
+                                <textarea class="form-control <?php $__errorArgs = ['allegics'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" name="allegics"
+                                    placeholder="Known allergies..."><?php echo e(old('allegics')); ?></textarea>
+                                <?php $__errorArgs = ['allegics'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong><?php echo e($message); ?></strong>
+                                    </span>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2">General Remarks: </label>
+                            <div class="col-sm-8">
+                                <textarea class="form-control <?php $__errorArgs = ['remarks'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" name="remarks"
+                                    placeholder="Any other notes..."><?php echo e(old('remarks')); ?></textarea>
+                                <?php $__errorArgs = ['remarks'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong><?php echo e($message); ?></strong>
+                                    </span>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group row">
@@ -298,24 +413,24 @@ unset($__errorArgs, $__bag); ?>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('third_party_scripts'); ?>
-    <script src="<?php echo e(asset('plugin/select2/select2.min.js')); ?>"></script>
-    <script>
-        $('.select2').select2();
-        var gu = $('input[name="guardian"]:checked').val();
-       function change_gu(gu){
-        if(gu=='o'){
+<script src="<?php echo e(asset('plugin/select2/select2.min.js')); ?>"></script>
+<script>
+    $('.select2').select2();
+    var gu = $('input[name="guardian"]:checked').val();
+    function change_gu(gu) {
+        if (gu == 'o') {
             $('.guardian').show();
-        }else{
+        } else {
             $('.guardian').hide();
         }
-       }
-       change_gu(gu);
+    }
+    change_gu(gu);
 
-       $(document).ready(function() {
+    $(document).ready(function () {
         // Hide the text box on page load
         $('#other_text').hide().prop('disabled', true);
 
-        $('#tmOther').change(function() {
+        $('#tmOther').change(function () {
             var otherText = $('#other_text');
 
             otherText.toggle(this.checked).prop('disabled', !this.checked);
@@ -326,11 +441,11 @@ unset($__errorArgs, $__bag); ?>
         });
     });
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Hide the text box on page load
         $('#fs-other_text').hide().prop('disabled', true);
 
-        $('#fsOther').change(function() {
+        $('#fsOther').change(function () {
             var otherText = $('#fs-other_text');
 
             otherText.toggle(this.checked).prop('disabled', !this.checked);
@@ -341,11 +456,11 @@ unset($__errorArgs, $__bag); ?>
         });
     });
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Hide the text box on page load
         $('#wdur-other_text').hide().prop('disabled', true);
 
-        $('#wduOther').change(function() {
+        $('#wduOther').change(function () {
             var otherText = $('#wdur-other_text');
 
             otherText.toggle(this.checked).prop('disabled', !this.checked);
@@ -355,7 +470,6 @@ unset($__errorArgs, $__bag); ?>
             }
         });
     });
-    </script>
+</script>
 <?php $__env->stopSection(); ?>
-
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Users/gihan.finsbury/Downloads/Vet-APP/Glowup/resources/views/patient/create.blade.php ENDPATH**/ ?>

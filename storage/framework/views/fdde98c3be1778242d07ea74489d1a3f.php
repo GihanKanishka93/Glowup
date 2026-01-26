@@ -122,6 +122,14 @@
             'label' => 'Dashboard',
             'items' => [
                 [
+                    'label' => 'Dashboard Overview',
+                    'icon' => 'fas fa-chart-pie',
+                    'route' => route('dashboard'),
+                    'active' => request()->routeIs('dashboard'),
+                    'badge' => 0,
+                    'badge_context' => 'info',
+                ],
+                [
                     'label' => 'Billing Workspace',
                     'icon' => 'fas fa-clipboard-check',
                     'route' => route('billing.create'),
@@ -1457,4 +1465,5 @@
             });
         });
     </script>
-<?php $__env->stopPush(); ?><?php /**PATH /Users/gihan.finsbury/Downloads/Vet-APP/Glowup/resources/views/layouts/menu.blade.php ENDPATH**/ ?>
+<?php $__env->stopPush(); ?>
+<?php /**PATH /Users/gihan.finsbury/Downloads/Vet-APP/Glowup/resources/views/layouts/menu.blade.php ENDPATH**/ ?>
