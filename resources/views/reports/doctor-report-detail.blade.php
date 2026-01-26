@@ -90,7 +90,7 @@
                                     @forelse ($recentInvoices as $row)
                                         <tr>
                                             <td>{{ $row->billing_id }}</td>
-                                            <td>{{ $row->pet_name ?? 'N/A' }}</td>
+                                            <td>{{ $row->patient_name ?? 'N/A' }}</td>
                                             <td class="text-end">{{ number_format($row->total ?? 0, 2) }}</td>
                                             <td class="text-end">{{ $row->billing_date ? \Illuminate\Support\Carbon::parse($row->billing_date)->toDateString() : 'N/A' }}</td>
                                         </tr>

@@ -28,8 +28,8 @@ class BillingReportDataTable extends DataTable
 
                 return '<a href="' . $url . '">' . $item->billing_id . '</a>';
             })
-            ->addColumn('pet_name', function ($item) {
-                return $item->treatment->pet->name ?? 'N/A';
+            ->addColumn('patient_name', function ($item) {
+                return $item->treatment->patient->name ?? 'N/A';
             })
             ->addColumn('doctor_name', function ($item) {
                 return $item->treatment->doctor->name ?? 'N/A';
@@ -62,7 +62,7 @@ class BillingReportDataTable extends DataTable
     public function query(Bill $model): QueryBuilder
     {
         $query = $model->newQuery()
-            ->with(['treatment.pet', 'treatment.doctor'])
+            ->with(['treatment.patient', 'treatment.doctor'])
             ->select('bills.*')
             ->whereBetween('bills.billing_date', [
                 Carbon::parse($this->start_date)->startOfDay(),
@@ -117,7 +117,7 @@ class BillingReportDataTable extends DataTable
         return [
             Column::make('DT_RowIndex')->title('#')->searchable(false)->orderable(false),
             Column::make('billing_id')->title('Billing ID')->orderable(true)->searchable(true),
-            Column::make('pet_name')->title('Client Name')->orderable(true)->searchable(true),
+            Column::make('patient_name')->title('Client Name')->orderable(true)->searchable(true),
             Column::make('doctor_name')->title('Doctor Name')->orderable(true)->searchable(true),
             Column::make('billing_date')->title('Billing Date')->orderable(true)->searchable(true),
             Column::make('total')->title('Bill Amount')->orderable(true)->searchable(true),

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class permissionSeeder extends Seeder
@@ -13,47 +14,50 @@ class permissionSeeder extends Seeder
      */
     public function run(): void
     {
+        // Clear cached permissions so newly added ones are picked up during syncPermissions
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         DB::table('permissions')->insertOrIgnore([
-            // [
-            //     'name' => 'user-create',
-            //     'guard_name' => 'web',
-            // ],
-            // [
-            //     'name' => 'user-edit',
-            //     'guard_name' => 'web',
-            // ],
-            // [
-            //     'name' => 'user-delete',
-            //     'guard_name' => 'web',
-            // ],
-            // [
-            //     'name' => 'user-reset-password',
-            //     'guard_name' => 'web',
-            // ],
-            // [
-            //     'name' => 'user-list',
-            //     'guard_name' => 'web',
-            // ],
-            // [
-            //     'name' => 'suspend-user-list',
-            //     'guard_name' => 'web',
-            // ],
-            // [
-            //     'name' => 'role-create',
-            //     'guard_name' => 'web',
-            // ],
-            // [
-            //     'name' => 'role-edit',
-            //     'guard_name' => 'web',
-            // ],
-            // [
-            //     'name' => 'role-delete',
-            //     'guard_name' => 'web',
-            // ],
-            // [
-            //     'name' => 'role-list',
-            //     'guard_name' => 'web',
-            // ],
+            [
+                'name' => 'user-create',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'user-edit',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'user-delete',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'user-reset-password',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'user-list',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'suspend-user-list',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'role-create',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'role-edit',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'role-delete',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'role-list',
+                'guard_name' => 'web',
+            ],
             // [
             //     'name' => 'room-create',
             //     'guard_name' => 'web',
@@ -327,22 +331,22 @@ class permissionSeeder extends Seeder
                     //     'name' => 'drug-delete',
                     //     'guard_name' => 'web'
                     // ],
-                    // [
-                    //     'name' => 'services-list',
-                    //     'guard_name' => 'web'
-                    // ],
-                    // [
-                    //     'name' => 'services-create',
-                    //     'guard_name' => 'web'
-                    // ],
-                    // [
-                    //     'name' => 'services-edit',
-                    //     'guard_name' => 'web'
-                    // ],
-                    // [
-                    //     'name' => 'services-delete',
-                    //     'guard_name' => 'web'
-                    // ],
+                    [
+                        'name' => 'services-list',
+                        'guard_name' => 'web'
+                    ],
+                    [
+                        'name' => 'services-create',
+                        'guard_name' => 'web'
+                    ],
+                    [
+                        'name' => 'services-edit',
+                        'guard_name' => 'web'
+                    ],
+                    [
+                        'name' => 'services-delete',
+                        'guard_name' => 'web'
+                    ],
                     [
                         'name' => 'vaccination-list',
                         'guard_name' => 'web'

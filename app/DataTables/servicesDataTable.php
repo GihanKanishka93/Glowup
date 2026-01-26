@@ -41,6 +41,27 @@ class servicesDataTable extends DataTable
                 }
                 return $btn;
             })
+            ->editColumn('stock_quantity', function ($services) {
+                // Determine color based on stock level
+                $status = 'success';
+                if ($services->stock_quantity <= 0) {
+                    $status = 'danger';
+                } elseif ($services->stock_quantity <= $services->min_stock_level) {
+                    $status = 'warning';
+                }
+
+                $unit = $services->unit ?? '';
+                $quantity = (float) $services->stock_quantity;
+
+                // Only show badge if it has a non-zero stock_quantity or min_stock_level 
+                // (to avoid cluttering pure service items)
+                if ($quantity == 0 && $services->min_stock_level == 0) {
+                    return '<span class="text-muted small">Service</span>';
+                }
+
+                return '<span class="badge badge-' . $status . '">' . $quantity . ' ' . $unit . '</span>';
+            })
+            ->rawColumns(['action', 'stock_quantity'])
             ->addIndexColumn()
             ->setRowId('id');
     }
@@ -59,7 +80,7 @@ class servicesDataTable extends DataTable
     public function html(): HtmlBuilder
     {
         return $this->builder()
-            ->setTableId('item-table')
+            ->setTableId('services-table')
             ->columns($this->getColumns())
             ->minifiedAjax()
             //->dom('Bfrtip')
@@ -84,10 +105,11 @@ class servicesDataTable extends DataTable
             Column::make('DT_RowIndex')->title('#')->searchable(false)->orderable(false),
             Column::make('name'),
             Column::make('price'),
+            Column::make('stock_quantity')->title('In Stock'),
             Column::computed('action')
                 ->exportable(false)
                 ->printable(false)
-                ->width(200)
+                ->width(150)
                 ->addClass('text-center'),
         ];
     }

@@ -41,6 +41,20 @@ class drugDataTable extends DataTable
                 }
                 return $btn;
             })
+            ->editColumn('stock_quantity', function ($drug) {
+                $status = 'success';
+                if ($drug->stock_quantity <= 0) {
+                    $status = 'danger';
+                } elseif ($drug->stock_quantity <= $drug->min_stock_level) {
+                    $status = 'warning';
+                }
+
+                $unit = $drug->unit ?? '';
+                $quantity = (float) $drug->stock_quantity;
+
+                return '<span class="badge badge-' . $status . '">' . $quantity . ' ' . $unit . '</span>';
+            })
+            ->rawColumns(['action', 'stock_quantity'])
             ->addIndexColumn()
             ->setRowId('id');
     }
@@ -59,7 +73,7 @@ class drugDataTable extends DataTable
     public function html(): HtmlBuilder
     {
         return $this->builder()
-            ->setTableId('item-table')
+            ->setTableId('drug-table')
             ->columns($this->getColumns())
             ->minifiedAjax()
             //->dom('Bfrtip')
@@ -83,10 +97,11 @@ class drugDataTable extends DataTable
         return [
             Column::make('DT_RowIndex')->title('#')->searchable(false)->orderable(false),
             Column::make('name'),
+            Column::make('stock_quantity')->title('In Stock'),
             Column::computed('action')
                 ->exportable(false)
                 ->printable(false)
-                ->width(200)
+                ->width(150)
                 ->addClass('text-center'),
         ];
     }

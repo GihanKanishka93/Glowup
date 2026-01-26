@@ -1,94 +1,95 @@
-<x-laravel-ui-adminlte::adminlte-layout>
+@extends('layouts.public')
+@section('content')
 
-    <body class="bg-gradient-login ">
-        <div class="container ">
-
-
+    <body class="bg-gradient-login login-body">
+        <div class="container login-container">
             <div class="row justify-content-center">
-
-                <div class="col-xl-10 col-lg-12 col-md-9">
-
-
-                    <div class="card o-hidden border-0 shadow-lg my-5 card_login ">
-                        <div class="card-body p-0">
-                            <div class="row">
-                                <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
-                                <div class="col-lg-6">
-                                    <div class="p-5">
-                                        <h1 class="h4 text-gray-900 mb-4 login_title">Reset Password</h1>
-    
-                            <p class="slogan">You are only one step a way from your new password, recover your
-                                password
-                                now.</p>
-
-                            <form action="{{ route('password.update') }}" method="POST">
-                                @csrf
-
-                                @php
-                                    if (!isset($token)) {
-                                        $token = \Request::route('token');
-                                    }
-                                @endphp
-
-                                <input type="hidden" name="token" value="{{ $token }}">
-
-                                <div class="input-group mb-3 {{ $errors->has('user_name') ? ' is-invalid' : '' }}">
-                                    <input type="user_name" name="user_name"
-                                        class="form-control form-control-user  "
-                                        placeholder="User Name">
-                                    <div class="input-group-append">
-                                        <div class="input-group-text"><span class="fas fa-user"></span></div>
-                                    </div>
-                                   
+                <div class="col-xl-11 col-lg-12">
+                    <div class="login-shell shadow-lg">
+                        <div class="row no-gutters align-items-stretch">
+                            <div class="col-lg-5 d-none d-lg-flex login-visual">
+                                <div class="login-visual-overlay">
+                                    <img src="{{ asset('img/Glowup_Logo-modified.png') }}" alt="Glowup Skin Clinic"
+                                        class="login-logo mb-4">
+                                    <h2 class="login-visual-title">Glowup Skin Clinic</h2>
+                                    <p class="login-visual-subtitle">Secure Credential Reset</p>
+                                    <ul class="login-highlights list-unstyled mt-4 mb-0">
+                                        <li><i class="fas fa-user-shield mr-2"></i>Verified recovery session</li>
+                                        <li><i class="fas fa-lock mr-2"></i>Encryption-standard security</li>
+                                        <li><i class="fas fa-check-circle mr-2"></i>Instant account reactivation</li>
+                                    </ul>
                                 </div>
-                                @if ($errors->has('email'))
-                                <span class="invalid-feedback">{{ $errors->first('email') }}</span>
-                            @endif
-
-                                <div class="input-group mb-3 {{ $errors->has('password') ? ' is-invalid' : '' }}">
-                                    <input type="password" name="password"
-                                        class="form-control "
-                                        placeholder="Password">
-                                    <div class="input-group-append">
-                                        <div class="input-group-text"><span class="fas fa-lock"></span></div>
+                            </div>
+                            <div class="col-lg-7">
+                                <div class="p-5 login-form">
+                                    <div class="mb-4">
+                                        <p class="eyebrow text-primary mb-1">Final step</p>
+                                        <h1 class="login-title mb-2">Set New Password</h1>
+                                        <p class="login-copy mb-0">Complete your recovery by choosing a new password.</p>
                                     </div>
-                                    
-                                </div>@if ($errors->has('password'))
-                                <span class="invalid-feedback">{{ $errors->first('password') }}</span>
-                            @endif
 
-                                <div class="input-group mb-3 {{ $errors->has('password_confirmation') ? ' is-invalid' : '' }}">
-                                    <input type="password" name="password_confirmation" class="form-control"
-                                        placeholder="Confirm Password">
-                                    <div class="input-group-append">
-                                        <div class="input-group-text"><span class="fas fa-lock"></span></div>
+                                    <form action="{{ route('password.update') }}" method="POST" class="user">
+                                        @csrf
+                                        <input type="hidden" name="token" value="{{ $token }}">
+
+                                        <div class="form-group mb-3">
+                                            <label class="form-label" for="user_name">User name</label>
+                                            <div class="input-group input-group-lg">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-user"></i></span>
+                                                </div>
+                                                <input type="text" name="user_name" value="{{ old('user_name') }}"
+                                                    class="form-control login-control @error('user_name') is-invalid @enderror"
+                                                    id="user_name" placeholder="Your username" required>
+                                                @error('user_name')
+                                                    <span class="invalid-feedback">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label class="form-label" for="password">New Password</label>
+                                            <div class="input-group input-group-lg">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                                </div>
+                                                <input type="password" name="password"
+                                                    class="form-control login-control @error('password') is-invalid @enderror"
+                                                    id="password" placeholder="New password" required>
+                                                @error('password')
+                                                    <span class="invalid-feedback">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group mb-4">
+                                            <label class="form-label" for="password_confirmation">Confirm Password</label>
+                                            <div class="input-group input-group-lg">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="fas fa-shield-alt"></i></span>
+                                                </div>
+                                                <input type="password" name="password_confirmation"
+                                                    class="form-control login-control" id="password_confirmation"
+                                                    placeholder="Verify password" required>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary btn-lg btn-block login-submit">
+                                            Update Password
+                                        </button>
+                                    </form>
+
+                                    <div class="text-center mt-4">
+                                        <a class="small font-weight-bold" href="{{ route('login') }}">
+                                            Return to login
+                                        </a>
                                     </div>
-                                    
-                                </div>
-                                @if ($errors->has('password_confirmation'))
-                                        <span
-                                            class="invalid-feedback">{{ $errors->first('password_confirmation') }}</span>
-                                    @endif
-
-                                <div class="row">
-                                    <div class="col-12">
-                                        <button type="submit" class="btn btn-primary btn-block">Reset Password</button>
-                                    </div>
-                                    <!-- /.col -->
-                                </div>
-                            </form>
-
-                            <p class="mt-3 mb-1">
-                                <a href="{{ route('login') }}">Login</a>
-                            </p>
-                                </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- /.login-card-body -->
                     </div>
                 </div>
             </div>
         </div>
     </body>
-</x-laravel-ui-adminlte::adminlte-layout>
+@endsection()

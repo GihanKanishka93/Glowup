@@ -52,12 +52,12 @@
                         </select>
                     </div>
                     <div class="col-sm-6 col-lg-3">
-                        <label for="pet_id" class="form-label">Client</label>
-                        <select id="pet_id" name="pet_id" class="form-select select2" data-placeholder="Any Client">
+                        <label for="patient_id" class="form-label">Client</label>
+                        <select id="patient_id" name="patient_id" class="form-select select2" data-placeholder="Any Client">
                             <option value=""></option>
-                            @foreach ($pets as $pet)
-                                <option value="{{ $pet->id }}" @selected(old('pet_id', $selectedPetId ?? null) == $pet->id)>
-                                    {{ $pet->name }}
+                            @foreach ($patients as $patient)
+                                <option value="{{ $patient->id }}" @selected(old('patient_id', $selectedPatientId ?? null) == $patient->id)>
+                                    {{ $patient->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -451,7 +451,7 @@
                     start_date: filters.start_date,
                     end_date: filters.end_date,
                     doctor_id: filters.doctor_id,
-                    pet_id: filters.pet_id,
+                    patient_id: filters.patient_id,
                     summary_only: true,
                 };
 
@@ -490,7 +490,7 @@
                     start_date: $('#start_date').val(),
                     end_date: $('#end_date').val(),
                     doctor_id: $('#doctor_id').val(),
-                    pet_id: $('#pet_id').val(),
+                    patient_id: $('#patient_id').val(),
                 };
 
                 if (billingTable) {
@@ -499,7 +499,7 @@
                         params.start_date = filters.start_date;
                         params.end_date = filters.end_date;
                         params.doctor_id = filters.doctor_id;
-                        params.pet_id = filters.pet_id;
+                        params.patient_id = filters.patient_id;
                     }
                     billingTable.ajax.reload(null, true);
                 }

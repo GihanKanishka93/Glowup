@@ -3,24 +3,24 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Pet;
+use App\Models\Patient;
 use App\Models\Treatment;
 use App\Models\Bill;
 use App\Models\Prescription;
-use App\Models\VaccinationInfo;
+
 
 class TreatmentController extends Controller
 {
 
-    public function show($pet_id)
+    public function show($patient_id)
     {
-        // Fetch pet details
-        $pet = Pet::findOrFail($pet_id);
+        // Fetch patient details
+        $patient = Patient::findOrFail($patient_id);
 
-        // Fetch treatments for the pet
-        $treatments = Treatment::where('pet_id', $pet_id)
+        // Fetch treatments for the patient
+        $treatments = Treatment::where('patient_id', $patient_id)
             ->orderBy('treatment_date', 'desc')
-            ->with(['bills', 'prescriptions', 'vaccinations'])
+            ->with(['bills', 'prescriptions'])
             ->paginate(10);
 
         // Calculate total billing amount
@@ -28,32 +28,31 @@ class TreatmentController extends Controller
         //     return $treatment->bill->total;
         // });
 
-       // Find the next billing date
-       $nextBillingDate = $treatments->first()->treatment_date ?? 'N/A';
+        // Find the next billing date
+        $nextBillingDate = $treatments->first()->treatment_date ?? 'N/A';
 
-       return view('medical-history.show', compact('pet', 'treatments', 'nextBillingDate'));
+        return view('medical-history.show', compact('patient', 'treatments', 'nextBillingDate'));
 
     }
 
     public function getTreatmentDetails(Request $request)
     {
-        $petId = $request->query('pet_id');
+        $patientId = $request->query('patient_id');
 
         // Fetch treatment details from the database
-        $treatments = Treatment::where('pet_id', $petId)
+        $treatments = Treatment::where('patient_id', $patientId)
             ->orderBy('treatment_date', 'desc')
             ->get();
 
         if ($treatments->isNotEmpty()) {
-            $pet = Pet::find($petId);
+            $patient = Patient::find($patientId);
             $response = [
                 'success' => true,
                 'data' => [
-                    'pet_name' => $pet->name,
+                    'patient_name' => $patient->name,
                     'doctor_name' => $treatments->first()->doctor->name,
-                    'pet_id' => $pet->id,
-                    'pet_type' => $pet->category->name,
-                    'pet_breed' => $pet->breed->name,
+                    'patient_id' => $patient->id,
+                    'patient_gender' => $patient->gender,
                     'history_complaint' => $treatments->first()->history_complaint,
                     'clinical_observation' => $treatments->first()->clinical_observation,
                     'remarks' => $treatments->first()->remarks,

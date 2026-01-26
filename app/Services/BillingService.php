@@ -6,11 +6,11 @@ use App\Http\Requests\StoreBillRequest;
 use App\Http\Requests\UpdateBillRequest;
 use App\Models\Bill;
 use App\Models\BillItem;
-use App\Models\Pet;
+use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\Treatment;
-use App\Models\VaccinationInfo;
-use App\Models\Vaccination;
+use App\Models\Drug;
+use App\Models\Services;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -19,22 +19,22 @@ class BillingService
     public function createFromRequest(StoreBillRequest $request): Bill
     {
         return DB::transaction(function () use ($request) {
-            $petId = $request->input('pet');
-            $petData = $this->extractPetPayload($request);
-            $pet = null;
+            $patientId = $request->input('patient');
+            $patientData = $this->extractPatientPayload($request);
+            $patient = null;
 
-            if (empty($petId) && $request->filled('pet_name')) {
-                $nextId = (int) Pet::withTrashed()->max('id') + 1;
-                $generatedPetId = 'CV' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+            if (empty($patientId) && $request->filled('patient_name')) {
+                $nextId = (int) Patient::withTrashed()->max('id') + 1;
+                $generatedPatientId = 'PT' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
 
-                $pet = Pet::create(array_merge([
-                    'pet_id' => $generatedPetId,
-                ], $petData));
+                $patient = Patient::create(array_merge([
+                    'patient_id' => $generatedPatientId,
+                ], $patientData));
 
-                $petId = $pet->id;
-            } elseif (!empty($petId)) {
-                $pet = Pet::findOrFail($petId);
-                $this->applyPetUpdates($pet, $petData);
+                $patientId = $patient->id;
+            } elseif (!empty($patientId)) {
+                $patient = Patient::findOrFail($patientId);
+                $this->applyPatientUpdates($patient, $patientData);
             }
 
             $billingDate = $request->date('billing_date');
@@ -52,19 +52,13 @@ class BillingService
                 $request->input('last_price', [])
             );
 
-            $vaccinationBillItems = $this->buildVaccinationBillItems(
-                $request->input('billing_date'),
-                $request->input('vaccine_name', []),
-                array_column($serviceBillItems, 'item_name')
-            );
-
-            $billItems = array_merge($serviceBillItems, $vaccinationBillItems);
+            $billItems = $serviceBillItems;
             $discount = (float) $request->input('discount', 0);
             $netAmount = $this->calculateNetAmount($billItems);
             $grandTotal = $this->calculateGrandTotal($netAmount, $discount);
 
             $treatment = Treatment::create([
-                'pet_id' => $petId,
+                'patient_id' => $patientId,
                 'doctor_id' => $request->integer('doctor'),
                 'history_complaint' => $request->input('history'),
                 'treatment_date' => $request->input('billing_date'),
@@ -86,15 +80,13 @@ class BillingService
             ]);
 
             $this->syncPrescriptions($treatment->id, $request->input('drug_name', []), $request->input('dosage', []), $request->input('dose', []), $request->input('duration', []));
-            $this->syncVaccinations($treatment->id, $request->input('vaccine_name', []), $request->input('vacc_duration', []), $request->input('next_vacc_weeks', []));
             $this->syncBillItems($bill->id, $billItems);
 
             return $bill->load([
-                'treatment.pet',
+                'treatment.patient',
                 'treatment.doctor',
                 'BillItems',
                 'treatment.prescriptions',
-                'treatment.vaccinations',
             ]);
         });
     }
@@ -113,13 +105,7 @@ class BillingService
                 $request->input('last_price', [])
             );
 
-            $vaccinationBillItems = $this->buildVaccinationBillItems(
-                $billingDate,
-                $request->input('vaccine_name', []),
-                array_column($serviceBillItems, 'item_name')
-            );
-
-            $billItems = array_merge($serviceBillItems, $vaccinationBillItems);
+            $billItems = $serviceBillItems;
             $discount = (float) $request->input('discount', 0);
             $netAmount = $this->calculateNetAmount($billItems);
             $grandTotal = $this->calculateGrandTotal($netAmount, $discount);
@@ -133,7 +119,7 @@ class BillingService
 
             $treatment = $bill->treatment;
             $treatment->update([
-                'pet_id' => $request->integer('pet'),
+                'patient_id' => $request->integer('patient'),
                 'doctor_id' => $request->integer('doctor'),
                 'history_complaint' => $request->input('history'),
                 'treatment_date' => $billingDate,
@@ -143,27 +129,40 @@ class BillingService
                 'next_clinic_weeks' => $request->input('next_treatment_weeks'),
             ]);
 
-            $pet = $treatment->pet;
-            $petData = $this->extractPetPayload($request);
-            if ($pet) {
-                $this->applyPetUpdates($pet, $petData);
+            $patient = $treatment->patient;
+            $patientData = $this->extractPatientPayload($request);
+            if ($patient) {
+                $this->applyPatientUpdates($patient, $patientData);
             }
 
-            Prescription::where('trement_id', $treatment->id)->delete();
-            $this->syncPrescriptions($treatment->id, $request->input('drug_name', []), $request->input('dosage', []), $request->input('dose', []), $request->input('duration', []));
-
-            VaccinationInfo::where('trement_id', $treatment->id)->delete();
-            $this->syncVaccinations($treatment->id, $request->input('vaccine_name', []), $request->input('vacc_duration', []), $request->input('next_vacc_weeks', []));
-
+            // Restore stock from old bill items before deleting them
+            $oldBillItems = BillItem::where('bill_id', $bill->id)->get();
+            foreach ($oldBillItems as $oldItem) {
+                $service = Services::where('name', $oldItem->item_name)->first();
+                if ($service) {
+                    $service->increment('stock_quantity', $oldItem->item_qty);
+                }
+            }
             BillItem::where('bill_id', $bill->id)->delete();
+
+            // Restore stock from old prescriptions before deleting them
+            $oldPrescriptions = Prescription::where('trement_id', $treatment->id)->get();
+            foreach ($oldPrescriptions as $oldPx) {
+                $drug = Drug::where('name', $oldPx->drug_name)->first();
+                if ($drug) {
+                    $drug->increment('stock_quantity', 1);
+                }
+            }
+            Prescription::where('trement_id', $treatment->id)->delete();
+
+            $this->syncPrescriptions($treatment->id, $request->input('drug_name', []), $request->input('dosage', []), $request->input('dose', []), $request->input('duration', []));
             $this->syncBillItems($bill->id, $billItems);
 
             return $bill->load([
-                'treatment.pet',
+                'treatment.patient',
                 'treatment.doctor',
                 'BillItems',
                 'treatment.prescriptions',
-                'treatment.vaccinations',
             ]);
         });
     }
@@ -182,33 +181,29 @@ class BillingService
                 'dose' => $doses[$index] ?? null,
                 'duration' => $durations[$index] ?? null,
             ]);
-        }
-    }
 
-    protected function syncVaccinations(int $treatmentId, array $vaccineIds, array $dates, array $weeks): void
-    {
-        foreach ($vaccineIds as $index => $vaccineId) {
-            if (!filled($vaccineId)) {
-                continue;
+            // Decrement stock for the drug
+            $drug = Drug::where('name', $drugName)->first();
+            if ($drug) {
+                $drug->decrement('stock_quantity', 1);
             }
-
-            VaccinationInfo::create([
-                'trement_id' => $treatmentId,
-                'vaccine_id' => $vaccineId,
-                'next_vacc_date' => $dates[$index] ?? null,
-                'next_vacc_weeks' => $weeks[$index] ?? null,
-            ]);
         }
     }
 
-    protected function buildServiceBillItems(?string $billingDate, array $serviceNames, array $quantities, array $unitPrices, array $taxes, array $totals): array
+
+
+    protected function buildServiceBillItems(?string $billingDate, array $serviceIds, array $quantities, array $unitPrices, array $taxes, array $totals): array
     {
         $items = [];
 
-        foreach ($serviceNames as $index => $serviceName) {
-            if (!filled($serviceName)) {
+        foreach ($serviceIds as $index => $serviceId) {
+            if (!filled($serviceId)) {
                 continue;
             }
+
+            // Fetch the service name and latest price by ID
+            $service = Services::find($serviceId);
+            $serviceName = $service ? $service->name : 'Unknown Service';
 
             $qty = (float) ($quantities[$index] ?? 0);
             $unitPrice = (float) ($unitPrices[$index] ?? 0);
@@ -236,43 +231,7 @@ class BillingService
         return $items;
     }
 
-    protected function buildVaccinationBillItems(?string $billingDate, array $vaccineIds, array $existingItemNames = []): array
-    {
-        $items = [];
-        $existingLookup = array_map(fn ($name) => strtolower((string) $name), array_filter($existingItemNames));
 
-        $vaccinations = Vaccination::whereIn('id', array_filter($vaccineIds))->get()->keyBy('id');
-
-        foreach ($vaccineIds as $vaccineId) {
-            if (!filled($vaccineId)) {
-                continue;
-            }
-
-            $vaccination = $vaccinations->get((int) $vaccineId);
-            if (!$vaccination) {
-                continue;
-            }
-
-            $label = $vaccination->name ?? 'Vaccination';
-
-            if (in_array(strtolower($label), $existingLookup, true)) {
-                continue;
-            }
-
-            $price = (float) ($vaccination->price ?? 0);
-
-            $items[] = [
-                'billing_date' => $billingDate,
-                'item_name' => $label,
-                'item_qty' => 1,
-                'unit_price' => $price,
-                'tax' => 0,
-                'total_price' => $price,
-            ];
-        }
-
-        return $items;
-    }
 
     protected function calculateNetAmount(array $billItems): float
     {
@@ -298,47 +257,78 @@ class BillingService
                 'tax' => $item['tax'] ?? null,
                 'total_price' => $item['total_price'] ?? null,
             ]);
+
+            // Decrement stock for the service/item
+            $service = Services::where('name', $item['item_name'])->first();
+            if ($service) {
+                $service->decrement('stock_quantity', $item['item_qty']);
+            }
         }
     }
 
     /**
-     * Build an array of pet attributes from the request payload.
+     * Build an array of patient attributes from the request payload.
      */
-    private function extractPetPayload($request): array
+    private function extractPatientPayload($request): array
     {
         return [
-            'name' => $request->input('pet_name'),
+            'name' => $request->input('patient_name') ?? $request->input('name') ?? $request->input('pet_name') ?? $request->input('owner_name'), // Fallback to owner_name if mixed input
+            'nic' => $request->input('nic') ?? $request->input('owner_nic'),
+            'mobile_number' => $request->input('contact') ?? $request->input('owner_contact'),
+            'whatsapp_number' => $request->input('whatsapp') ?? $request->input('owner_whatsapp'),
+            'email' => $request->input('email') ?? $request->input('owner_email'),
+            'address' => $request->input('address') ?? $request->input('owner_address'),
+            'occupation' => $request->input('occupation'),
             'gender' => $request->input('gender'),
-            'age_at_register' => $request->input('age'),
             'date_of_birth' => $request->input('date_of_birth'),
-            'weight' => $request->input('weight'),
-            'color' => $request->input('colour'),
-            'pet_category' => $request->input('pet_category'),
-            'pet_breed' => $request->input('breed'),
+            'allegics' => $request->input('allegics'),
+            'basic_ilness' => $request->input('medical_history') ?? $request->input('basic_ilness'),
+            'surgical_history' => $request->input('surgical_history'),
             'remarks' => $request->input('remarks'),
-            'owner_name' => $request->input('owner_name'),
-            'owner_contact' => $request->input('owner_contact'),
-            'owner_whatsapp' => $request->input('owner_whatsapp'),
-            'owner_email' => $request->input('owner_email'),
-            'owner_address' => $request->input('address'),
         ];
     }
 
     /**
-     * Apply updates to a pet while ignoring empty values, saving only when data changed.
+     * Apply updates to a patient while ignoring empty values, saving only when data changed.
      */
-    private function applyPetUpdates(Pet $pet, array $petData): void
+    private function applyPatientUpdates(Patient $patient, array $patientData): void
     {
         $filteredData = array_filter(
-            $petData,
-            fn ($value) => $value !== null && $value !== ''
+            $patientData,
+            fn($value) => $value !== null && $value !== '' && $value !== 'undefined'
         );
 
         if (!empty($filteredData)) {
-            $pet->fill($filteredData);
+            $patient->fill($filteredData);
 
-            if ($pet->isDirty()) {
-                $pet->save();
+            if ($patient->isDirty()) {
+                $patient->save();
+            }
+        }
+    }
+
+    /**
+     * Restore stock when a bill is deleted.
+     */
+    public function restoreStock(Bill $bill): void
+    {
+        $treatment = $bill->treatment;
+        if (!$treatment)
+            return;
+
+        // Restore stock from bill items
+        foreach ($bill->BillItems ?? [] as $item) {
+            $service = Services::where('name', $item->item_name)->first();
+            if ($service) {
+                $service->increment('stock_quantity', $item->item_qty);
+            }
+        }
+
+        // Restore stock from prescriptions
+        foreach ($treatment->prescriptions ?? [] as $px) {
+            $drug = Drug::where('name', $px->drug_name)->first();
+            if ($drug) {
+                $drug->increment('stock_quantity', 1);
             }
         }
     }

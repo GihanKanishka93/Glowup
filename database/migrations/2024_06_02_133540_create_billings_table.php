@@ -10,6 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        // Guard against rerun in prod refresh flows
+        if (Schema::hasTable('bills')) {
+            return;
+        }
+
         Schema::create('bills', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
@@ -40,6 +45,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('billings');
+        Schema::dropIfExists('bills');
     }
 };

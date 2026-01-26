@@ -20,11 +20,15 @@ class ServiceController extends Controller
         return $dataTable->render('settings.services.index');
     }
 
-    public function getServicePrice($name)
+    public function getServicePrice($id)
     {
-        $service = Services::where('name', $name)->first();
+        $service = Services::find($id);
         if ($service) {
-            return response()->json(['price' => $service->price]);
+            return response()->json([
+                'price' => $service->price,
+                'stock' => $service->stock_quantity,
+                'unit' => $service->unit
+            ]);
         } else {
             return response()->json(['error' => 'Service not found'], 404);
         }
@@ -50,6 +54,9 @@ class ServiceController extends Controller
         Services::create([
             'name' => $request->name,
             'price' => $request->price,
+            'stock_quantity' => $request->stock_quantity ?? 0,
+            'min_stock_level' => $request->min_stock_level ?? 0,
+            'unit' => $request->unit,
         ]);
 
         return redirect()->route('services.index')->with('message', 'services Name Added');
@@ -85,6 +92,9 @@ class ServiceController extends Controller
         $service->update([
             'name' => $request->name,
             'price' => $request->price,
+            'stock_quantity' => $request->stock_quantity ?? 0,
+            'min_stock_level' => $request->min_stock_level ?? 0,
+            'unit' => $request->unit,
         ]);
 
         return redirect()->route('services.index')->with('message', 'Service updated successfully');

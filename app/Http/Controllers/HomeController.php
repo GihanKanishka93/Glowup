@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Room;
+use App\Models\Services;
 
 class HomeController extends Controller
 {
@@ -29,7 +31,14 @@ class HomeController extends Controller
         if (Auth::user()->hasRole('Cashier')) {
             return redirect()->to('billing');
         } else {
-            return redirect()->to('billing/create');
+            $floor = Room::all(); // Simplified for now since the original code was commented out
+            $date = $request->date ?? now()->toDateString();
+
+            $lowStockItems = Services::whereColumn('stock_quantity', '<=', 'min_stock_level')
+                ->where('min_stock_level', '>', 0)
+                ->get();
+
+            return view('home', compact('floor', 'date', 'lowStockItems'));
         }
 
         //     $floor = floor::where('id', '>', 1)->orderBy('number')->get();

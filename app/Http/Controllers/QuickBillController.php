@@ -6,12 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\Treatment;
 use App\Models\Bill;
 use App\Models\Doctor;
-use App\Models\Pet;
 use App\Models\BillItem;
 use App\Models\Prescription;
-use App\Models\VaccinationInfo;
 use App\Models\Drug;
-use App\Models\Vaccination;
 use App\Models\Services;
 use App\Models\DosageTypes;
 use App\Models\DurationTypes;
@@ -20,8 +17,6 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\DataTables\billingDataTable;
 use Illuminate\Support\Facades\Storage;
-use App\Models\PetCategory;
-use App\Models\PetBreed;
 use PDF;  // Use this alias if configured in aliases array
 
 class QuickBillController extends Controller

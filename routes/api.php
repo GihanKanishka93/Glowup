@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\AdmissionController;
 use App\Http\Controllers\Api\BillingController as ApiBillingController;
 use App\Http\Controllers\Api\OccupancyController;
 use App\Http\Controllers\Api\PatientController as ApiPatientController;
-use App\Http\Controllers\Api\PetController as ApiPetController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\UserPreferenceController;
 
@@ -36,7 +35,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('preferences/status', [UserPreferenceController::class, 'updateStatus']);
 
     Route::apiResource('patients', ApiPatientController::class);
-    Route::apiResource('pets', ApiPetController::class);
     Route::apiResource('billing', ApiBillingController::class);
     Route::apiResource('admissions', AdmissionController::class);
     Route::apiResource('occupancies', OccupancyController::class);

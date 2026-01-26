@@ -12,6 +12,11 @@ class SkinLookupsSeeder extends Seeder
      */
     public function run(): void
     {
+        // If the legacy pet lookup tables were dropped (skin clinic mode), skip.
+        if (!\Schema::hasTable('pet_categories') || !\Schema::hasTable('pet_breeds') || !\Schema::hasTable('pets')) {
+            return;
+        }
+
         $skinTypes = [
             'Normal',
             'Dry',

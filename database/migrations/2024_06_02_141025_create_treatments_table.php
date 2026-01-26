@@ -10,17 +10,28 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (Schema::hasTable('treatments')) {
+            return;
+        }
+
         Schema::create('treatments', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+
+            // Legacy vet relation kept for backward compatibility; removed later in refactor migration
             $table->bigInteger('pet_id')->nullable()->unsigned();
             $table->foreign('pet_id')->references('id')->on('pets');
+
             $table->bigInteger('doctor_id')->nullable()->unsigned();
             $table->foreign('doctor_id')->references('id')->on('doctors');
+
             $table->string('history_complaint', 255)->nullable();
             $table->string('clinical_observation', 255)->nullable();
             $table->string('remarks', 255)->nullable();
+            $table->date('treatment_date')->nullable();
             $table->date('next_clinic_date')->nullable();
+            $table->string('next_clinic_weeks', 100)->nullable();
+
             $table->softDeletes();
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->bigInteger('updated_by')->unsigned()->nullable();

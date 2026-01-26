@@ -3,11 +3,9 @@
 namespace App\Services;
 
 use App\Mail\NextClinicReminderMail;
-use App\Mail\VaccinationReminderMail;
 use App\Models\ReminderLog;
 use App\Models\ReminderSetting;
 use App\Models\Treatment;
-use App\Models\VaccinationInfo;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -23,56 +21,11 @@ class ReminderService
         config()->set('reminders.reply_to', $settings['reply_to']);
 
         return [
-            'vaccinations' => $this->sendVaccinationReminders(),
             'followups' => $this->sendNextClinicReminders(),
         ];
     }
 
-    public function sendVaccinationReminders(): int
-    {
-        $settings = $this->settings();
 
-        if (!$settings['send_vaccination']) {
-            return 0;
-        }
-
-        $dates = $this->targetDates($settings['lead_days']);
-        $count = 0;
-
-        VaccinationInfo::with(['treatment.pet', 'vaccine'])
-            ->whereIn(\DB::raw('DATE(next_vacc_date)'), $dates)
-            ->whereNull('reminder_sent_at')
-            ->whereHas('treatment.pet', function ($q) {
-                $q->whereNotNull('owner_email');
-            })
-            ->chunk(100, function ($items) use (&$count) {
-                foreach ($items as $vaccination) {
-                    $pet = $vaccination->treatment?->pet;
-                    if (!$pet || empty($pet->owner_email)) {
-                        continue;
-                    }
-
-                    try {
-                        Mail::to($pet->owner_email)
-                            ->send(new VaccinationReminderMail($pet, $vaccination));
-
-                        $vaccination->reminder_sent_at = Carbon::now();
-                        $vaccination->save();
-                        $this->logReminder('vaccination', $pet->id, $vaccination->trement_id, $vaccination->id, $pet->owner_email, 'sent', null);
-                        $count++;
-                    } catch (\Throwable $e) {
-                        Log::warning('Vaccination reminder failed', [
-                            'vaccination_id' => $vaccination->id,
-                            'pet_id' => $pet->id ?? null,
-                            'error' => $e->getMessage(),
-                        ]);
-                        $this->logReminder('vaccination', $pet->id ?? null, $vaccination->trement_id, $vaccination->id, $pet->owner_email ?? null, 'failed', $e->getMessage());
-                    }
-                }
-            });
-
-        return $count;
-    }
 
     public function sendNextClinicReminders(): int
     {
@@ -85,34 +38,34 @@ class ReminderService
         $dates = $this->targetDates($settings['lead_days']);
         $count = 0;
 
-        Treatment::with(['pet', 'doctor'])
+        Treatment::with(['patient', 'doctor'])
             ->whereIn(\DB::raw('DATE(next_clinic_date)'), $dates)
             ->whereNull('next_clinic_reminder_sent_at')
-            ->whereHas('pet', function ($q) {
-                $q->whereNotNull('owner_email');
+            ->whereHas('patient', function ($q) {
+                $q->whereNotNull('email');
             })
             ->chunk(100, function ($treatments) use (&$count) {
                 foreach ($treatments as $treatment) {
-                    $pet = $treatment->pet;
-                    if (!$pet || empty($pet->owner_email)) {
+                    $patient = $treatment->patient;
+                    if (!$patient || empty($patient->email)) {
                         continue;
                     }
 
                     try {
-                        Mail::to($pet->owner_email)
-                            ->send(new NextClinicReminderMail($pet, $treatment));
+                        Mail::to($patient->email)
+                            ->send(new NextClinicReminderMail($patient, $treatment));
 
                         $treatment->next_clinic_reminder_sent_at = Carbon::now();
                         $treatment->save();
-                        $this->logReminder('next_clinic', $pet->id, $treatment->id, null, $pet->owner_email, 'sent', null);
+                        $this->logReminder('next_clinic', $patient->id, $treatment->id, null, $patient->email, 'sent', null);
                         $count++;
                     } catch (\Throwable $e) {
                         Log::warning('Next clinic reminder failed', [
                             'treatment_id' => $treatment->id,
-                            'pet_id' => $pet->id ?? null,
+                            'patient_id' => $patient->id ?? null,
                             'error' => $e->getMessage(),
                         ]);
-                        $this->logReminder('next_clinic', $pet->id ?? null, $treatment->id, null, $pet->owner_email ?? null, 'failed', $e->getMessage());
+                        $this->logReminder('next_clinic', $patient->id ?? null, $treatment->id, null, $patient->email ?? null, 'failed', $e->getMessage());
                     }
                 }
             });
@@ -125,9 +78,6 @@ class ReminderService
         $settings = $this->settings();
         $results = ['vaccinations' => 0, 'followups' => 0];
 
-        if ($settings['weekly_vaccination']) {
-            $results['vaccinations'] = $this->sendWeeklyVaccinationReminders();
-        }
         if ($settings['weekly_followup']) {
             $results['followups'] = $this->sendWeeklyNextClinicReminders();
         }
@@ -135,77 +85,40 @@ class ReminderService
         return $results;
     }
 
-    protected function sendWeeklyVaccinationReminders(): int
-    {
-        $count = 0;
-        VaccinationInfo::with(['treatment.pet', 'vaccine'])
-            ->whereNotNull('next_vacc_date')
-            ->whereRaw('DATEDIFF(next_vacc_date, CURDATE()) >= 0')
-            ->whereRaw('MOD(DATEDIFF(next_vacc_date, CURDATE()), 7) = 0')
-            ->whereHas('treatment.pet', function ($q) {
-                $q->whereNotNull('owner_email');
-            })
-            ->chunk(100, function ($items) use (&$count) {
-                foreach ($items as $vaccination) {
-                    $pet = $vaccination->treatment?->pet;
-                    if (!$pet || empty($pet->owner_email)) {
-                        continue;
-                    }
-                    if ($this->alreadySentToday('vaccination', $pet->id, $vaccination->trement_id, $vaccination->id)) {
-                        continue;
-                    }
-                    try {
-                        Mail::to($pet->owner_email)
-                            ->send(new VaccinationReminderMail($pet, $vaccination));
 
-                        $this->logReminder('vaccination', $pet->id, $vaccination->trement_id, $vaccination->id, $pet->owner_email, 'sent', null);
-                        $count++;
-                    } catch (\Throwable $e) {
-                        Log::warning('Weekly vaccination reminder failed', [
-                            'vaccination_id' => $vaccination->id,
-                            'pet_id' => $pet->id ?? null,
-                            'error' => $e->getMessage(),
-                        ]);
-                        $this->logReminder('vaccination', $pet->id ?? null, $vaccination->trement_id, $vaccination->id, $pet->owner_email ?? null, 'failed', $e->getMessage());
-                    }
-                }
-            });
-
-        return $count;
-    }
 
     protected function sendWeeklyNextClinicReminders(): int
     {
         $count = 0;
-        Treatment::with(['pet', 'doctor'])
+        Treatment::with(['patient', 'doctor'])
             ->whereNotNull('next_clinic_date')
             ->whereRaw('DATEDIFF(next_clinic_date, CURDATE()) >= 0')
             ->whereRaw('MOD(DATEDIFF(next_clinic_date, CURDATE()), 7) = 0')
-            ->whereHas('pet', function ($q) {
-                $q->whereNotNull('owner_email');
+            ->whereHas('patient', function ($q) {
+                $q->whereNotNull('email');
             })
             ->chunk(100, function ($treatments) use (&$count) {
                 foreach ($treatments as $treatment) {
-                    $pet = $treatment->pet;
-                    if (!$pet || empty($pet->owner_email)) {
+                    $patient = $treatment->patient;
+                    if (!$patient || empty($patient->email)) {
                         continue;
                     }
-                    if ($this->alreadySentToday('next_clinic', $pet->id, $treatment->id, null)) {
+                    if ($this->alreadySentToday('next_clinic', $patient->id, $treatment->id, null)) {
                         continue;
                     }
                     try {
-                        Mail::to($pet->owner_email)
-                            ->send(new NextClinicReminderMail($pet, $treatment));
+                        Mail::to($patient->email)
+                            ->send(new NextClinicReminderMail($patient, $treatment));
 
-                        $this->logReminder('next_clinic', $pet->id, $treatment->id, null, $pet->owner_email, 'sent', null);
+                        $this->logReminder('next_clinic', $patient->id, $treatment->id, null, $patient->email, 'sent', null);
                         $count++;
                     } catch (\Throwable $e) {
                         Log::warning('Weekly next clinic reminder failed', [
                             'treatment_id' => $treatment->id,
-                            'pet_id' => $pet->id ?? null,
+                            'patient_id' => $patient->id ?? null,
                             'error' => $e->getMessage(),
                         ]);
-                        $this->logReminder('next_clinic', $pet->id ?? null, $treatment->id, null, $pet->owner_email ?? null, 'failed', $e->getMessage());
+                        $this->logReminder('next_clinic', $patient->id ?? null, $treatment->id, null, $patient->email ?? null, 'failed', $e->getMessage());
                     }
                 }
             });
@@ -215,7 +128,7 @@ class ReminderService
 
     private function targetDates(array $leadDays): array
     {
-        return array_map(fn ($d) => Carbon::now()->addDays((int) $d)->toDateString(), $leadDays);
+        return array_map(fn($d) => Carbon::now()->addDays((int) $d)->toDateString(), $leadDays);
     }
 
     private function settings(): array
@@ -224,9 +137,7 @@ class ReminderService
         $leadDays = $db?->lead_days ?: config('reminders.lead_days', [1, 3, 7]);
 
         return [
-            'send_vaccination' => $db?->send_vaccination ?? config('reminders.send_vaccination', true),
             'send_followup' => $db?->send_followup ?? config('reminders.send_followup', true),
-            'weekly_vaccination' => $db?->send_vaccination ?? config('reminders.weekly_vaccination', true),
             'weekly_followup' => $db?->send_followup ?? config('reminders.weekly_followup', true),
             'lead_days' => array_map('intval', (array) $leadDays),
             'from_email' => $db?->from_email ?? config('reminders.from_email'),
@@ -237,7 +148,7 @@ class ReminderService
 
     private function logReminder(
         string $type,
-        ?int $petId,
+        ?int $patientId,
         ?int $treatmentId,
         ?int $vaccinationInfoId,
         ?string $ownerEmail,
@@ -246,7 +157,7 @@ class ReminderService
     ): void {
         ReminderLog::create([
             'reminder_type' => $type,
-            'pet_id' => $petId,
+            'patient_id' => $patientId,
             'treatment_id' => $treatmentId,
             'vaccination_info_id' => $vaccinationInfoId,
             'owner_email' => $ownerEmail,
@@ -256,12 +167,12 @@ class ReminderService
         ]);
     }
 
-    private function alreadySentToday(string $type, ?int $petId, ?int $treatmentId, ?int $vaccinationInfoId): bool
+    private function alreadySentToday(string $type, ?int $patientId, ?int $treatmentId, ?int $vaccinationInfoId): bool
     {
         return ReminderLog::query()
             ->whereDate('sent_at', Carbon::today())
             ->where('reminder_type', $type)
-            ->where('pet_id', $petId)
+            ->where('patient_id', $patientId)
             ->where('treatment_id', $treatmentId)
             ->where('vaccination_info_id', $vaccinationInfoId)
             ->exists();

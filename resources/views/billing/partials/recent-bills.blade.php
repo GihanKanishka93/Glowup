@@ -7,10 +7,12 @@
             @php
                 $billDate = $bill->billing_date ? \Illuminate\Support\Carbon::parse($bill->billing_date) : null;
             @endphp
-            <a href="{{ route('billing.show', $bill->id) }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            <a href="{{ route('billing.show', $bill->id) }}"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                 <div>
-                    <div class="fw-semibold">{{ $bill->treatment->pet->name ?? 'Unknown Client' }}</div>
-                    <div class="text-muted small">Bill #{{ $bill->billing_id }} @if($billDate) · {{ $billDate->format('d M') }} @endif</div>
+                    <div class="fw-semibold">{{ $bill->treatment->patient->name ?? 'Unknown Client' }}</div>
+                    <div class="text-muted small">Bill #{{ $bill->billing_id }} @if($billDate) ·
+                    {{ $billDate->format('d M') }} @endif</div>
                 </div>
                 <span class="fw-semibold">Rs {{ number_format($bill->total ?? 0, 2) }}</span>
             </a>

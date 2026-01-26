@@ -2,7 +2,7 @@
     'pets' => [],
     'name' => 'pet',
     'id' => null,
-    'label' => 'Client',
+    'label' => 'Patient',
     'selected' => null,
     'required' => false,
     'columnClass' => 'col-12 col-lg-6',
@@ -32,7 +32,7 @@
         <option value=""></option>
         @foreach ($pets as $item)
             <option value="{{ $item->id }}" @selected($currentValue == $item->id)>
-                {{ $item->pet_id }} - {{ $item->name }}
+                {{ $item->patient_id }} - {{ $item->name }}
             </option>
         @endforeach
     </select>

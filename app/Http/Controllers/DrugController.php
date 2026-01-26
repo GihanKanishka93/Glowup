@@ -39,6 +39,9 @@ class DrugController extends Controller
 
         Drug::create([
             'name' => $request->name,
+            'stock_quantity' => $request->stock_quantity ?? 0,
+            'min_stock_level' => $request->min_stock_level ?? 0,
+            'unit' => $request->unit,
         ]);
 
         return redirect()->route('drug.index')->with('message', 'Drug Name Added');
@@ -66,11 +69,14 @@ class DrugController extends Controller
     public function update(Request $request, Drug $drug)
     {
         $request->validate([
-            'name' => 'required|min:1|unique:pet_categories,name,' . $drug->id,
+            'name' => 'required|min:1|unique:drugs,name,' . $drug->id,
         ]);
 
         $drug->update([
             'name' => $request->name,
+            'stock_quantity' => $request->stock_quantity ?? 0,
+            'min_stock_level' => $request->min_stock_level ?? 0,
+            'unit' => $request->unit,
         ]);
 
         return redirect()->route('drug.index')->with('message', 'drug update');

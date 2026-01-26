@@ -22,8 +22,8 @@ class monthlyReportDataTable extends DataTable
 
                 return '<a href="' . $url . '">' . $item->billing_id . '</a>';
             })
-            ->addColumn('pet_name', function ($item) {
-                return $item->treatment->pet->name ?? 'N/A';
+            ->addColumn('patient_name', function ($item) {
+                return $item->treatment->patient->name ?? 'N/A';
             })
             ->addColumn('doctor_name', function ($item) {
                 return $item->treatment->doctor->name ?? 'N/A';
@@ -56,7 +56,7 @@ class monthlyReportDataTable extends DataTable
         $orderByColumnIndex = request()->input('order.0.column');
         $orderByDirection = request()->input('order.0.dir');
         $selectedDoctorId = request()->input('doctor_id');
-        $selectedPetId = request()->input('pet_id');
+        $selectedPatientId = request()->input('patient_id');
         $startDateInput = request()->input('start_date');
         $endDateInput = request()->input('end_date');
 
@@ -66,7 +66,7 @@ class monthlyReportDataTable extends DataTable
         // Start with the base query and include necessary relationships
         $query = $model->newQuery()
             ->with([
-                'treatment.pet',
+                'treatment.patient',
                 'treatment.doctor',
             ])
             ->whereBetween('bills.billing_date', [$currentMonthStart, $currentMonthEnd])
@@ -79,19 +79,19 @@ class monthlyReportDataTable extends DataTable
             });
         }
 
-        if (!empty($selectedPetId)) {
-            $query->whereHas('treatment.pet', function ($q) use ($selectedPetId) {
-                $q->where('pets.id', $selectedPetId)
-                    ->whereNull('pets.deleted_at');
+        if (!empty($selectedPatientId)) {
+            $query->whereHas('treatment.patient', function ($q) use ($selectedPatientId) {
+                $q->where('patients.id', $selectedPatientId)
+                    ->whereNull('patients.deleted_at');
             });
         }
 
         // Apply search filter if a search value is provided
         if ($searchValue) {
             $query->where(function ($q) use ($searchValue) {
-                $q->whereHas('treatment.pet', function ($q) use ($searchValue) {
+                $q->whereHas('treatment.patient', function ($q) use ($searchValue) {
                     $q->where('name', 'like', '%' . $searchValue . '%')
-                        ->whereNull('pets.deleted_at'); // Exclude soft-deleted pets
+                        ->whereNull('patients.deleted_at'); // Exclude soft-deleted patients
                 })
                     ->orWhereHas('treatment.doctor', function ($q) use ($searchValue) {
                         $q->where('name', 'like', '%' . $searchValue . '%')
@@ -109,9 +109,9 @@ class monthlyReportDataTable extends DataTable
                     $query->orderBy('bills.billing_date', $orderByDirection);
                     break;
                 case 2:
-                    $query->orderBy(Treatment::select('pets.name')
-                        ->join('pets', 'pets.id', '=', 'treatments.pet_id')
-                        ->whereNull('pets.deleted_at') // Exclude soft-deleted pets
+                    $query->orderBy(Treatment::select('patients.name')
+                        ->join('patients', 'patients.id', '=', 'treatments.patient_id')
+                        ->whereNull('patients.deleted_at') // Exclude soft-deleted patients
                         ->whereColumn('treatments.id', 'bills.treatment_id'), $orderByDirection);
                     break;
                 case 3:
@@ -131,7 +131,7 @@ class monthlyReportDataTable extends DataTable
         return $this->builder()
             ->setTableId('billing-table')
             ->columns($this->getColumns())
-            ->minifiedAjax('', "data.start_date = $('#start_date').val(); data.end_date = $('#end_date').val(); data.doctor_id = $('#doctor_id').val(); data.pet_id = $('#pet_id').val();")
+            ->minifiedAjax('', "data.start_date = $('#start_date').val(); data.end_date = $('#end_date').val(); data.doctor_id = $('#doctor_id').val(); data.patient_id = $('#patient_id').val();")
             ->orderBy(1, 'desc')
             ->selectStyleSingle()
             ->buttons([
@@ -159,7 +159,7 @@ class monthlyReportDataTable extends DataTable
         return [
             Column::make('DT_RowIndex')->title('#')->searchable(false)->orderable(false),
             Column::make('billing_id')->title('Billing ID')->orderable(true)->searchable(true),
-            Column::make('pet_name')->title('Client Name')->orderable(true)->searchable(true),
+            Column::make('patient_name')->title('Client Name')->orderable(true)->searchable(true),
             Column::make('doctor_name')->title('Doctor Name')->orderable(true)->searchable(true),
             Column::make('billing_date')->title('Billing Date')->orderable(true)->searchable(true),
             Column::make('total')->title('Bill Amount')->orderable(true)->searchable(true),

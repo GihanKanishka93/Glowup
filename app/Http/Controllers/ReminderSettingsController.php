@@ -11,7 +11,7 @@ class ReminderSettingsController extends Controller
     public function index()
     {
         $settings = ReminderSetting::query()->latest('id')->first();
-        $logs = ReminderLog::with(['pet'])
+        $logs = ReminderLog::with(['patient'])
             ->latest('sent_at')
             ->paginate(25);
 
@@ -33,9 +33,9 @@ class ReminderSettingsController extends Controller
         ]);
 
         $leadDays = collect(explode(',', $validated['lead_days']))
-            ->map(fn ($d) => trim($d))
+            ->map(fn($d) => trim($d))
             ->filter()
-            ->map(fn ($d) => (int) $d)
+            ->map(fn($d) => (int) $d)
             ->unique()
             ->values()
             ->toArray();

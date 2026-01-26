@@ -9,7 +9,7 @@
             @endphp
             <div class="list-group-item d-flex align-items-center justify-content-between">
                 <div>
-                    <div class="fw-semibold">{{ $visit->pet->name ?? 'Unknown Client' }}</div>
+                    <div class="fw-semibold">{{ $visit->patient->name ?? 'Unknown Client' }}</div>
                     <div class="text-muted small">
                         with {{ $visit->doctor->name ?? '—' }}
                         @if($visitDate)

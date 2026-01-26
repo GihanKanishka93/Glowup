@@ -1,90 +1,112 @@
 @extends('layouts.public')
 @section('content')
-    <body class="hold-transition register-page">
-        <div class="register-box">
-            <div class="register-logo">
-                <a href="{{ url('/home') }}"><b>{{ config('app.name') }}</b></a>
-            </div>
 
-            <div class="card">
-                <div class="card-body register-card-body">
-                    <p class="login-box-msg">Register a new membership</p>
-
-                    <form method="post" action="{{ route('register') }}">
-                        @csrf
-
-                        <div class="input-group mb-3">
-                            <input type="text" name="name"
-                                class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}"
-                                placeholder="Full name">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><span class="fas fa-user"></span></div>
-                            </div>
-                            @error('name')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-
-                        <div class="input-group mb-3">
-                            <input type="email" name="email" value="{{ old('email') }}"
-                                class="form-control @error('email') is-invalid @enderror" placeholder="Email">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><span class="fas fa-envelope"></span></div>
-                            </div>
-                            @error('email')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-
-                        <div class="input-group mb-3">
-                            <input type="password" name="password"
-                                class="form-control @error('password') is-invalid @enderror" placeholder="Password">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><span class="fas fa-lock"></span></div>
-                            </div>
-                            @error('password')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-
-                        <div class="input-group mb-3">
-                            <input type="password" name="password_confirmation" class="form-control"
-                                placeholder="Retype password">
-                            <div class="input-group-append">
-                                <div class="input-group-text"><span class="fas fa-lock"></span></div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-8">
-                                <div class="icheck-primary">
-                                    <input type="checkbox" id="agreeTerms" name="terms" value="agree">
-                                    <label for="agreeTerms">
-                                        I agree to the <a href="#">terms</a>
-                                    </label>
+    <body class="bg-gradient-login login-body">
+        <div class="container login-container">
+            <div class="row justify-content-center">
+                <div class="col-xl-11 col-lg-12">
+                    <div class="login-shell shadow-lg">
+                        <div class="row no-gutters align-items-stretch">
+                            <div class="col-lg-5 d-none d-lg-flex login-visual">
+                                <div class="login-visual-overlay">
+                                    <img src="{{ asset('img/Glowup_Logo-modified.png') }}" alt="Glowup Skin Clinic"
+                                        class="login-logo mb-4">
+                                    <h2 class="login-visual-title">Join Glowup</h2>
+                                    <p class="login-visual-subtitle">Clinical Management Environment</p>
+                                    <ul class="login-highlights list-unstyled mt-4 mb-0">
+                                        <li><i class="fas fa-id-card mr-2"></i>Personalized practitioner profile</li>
+                                        <li><i class="fas fa-clock mr-2"></i>Shared clinical scheduling</li>
+                                        <li><i class="fas fa-lock mr-2"></i>Standardized security protocols</li>
+                                    </ul>
                                 </div>
                             </div>
-                            <!-- /.col -->
-                            <div class="col-4">
-                                <button type="submit" class="btn btn-primary btn-block">Register</button>
+                            <div class="col-lg-7">
+                                <div class="p-5 login-form">
+                                    <div class="mb-4">
+                                        <p class="eyebrow text-primary mb-1">New account</p>
+                                        <h1 class="login-title mb-2">Create Profile</h1>
+                                        <p class="login-copy mb-0">Set up your practitioner credentials to get started.</p>
+                                    </div>
+
+                                    <form method="POST" action="{{ route('register') }}" class="user">
+                                        @csrf
+
+                                        <div class="form-group mb-3">
+                                            <label class="form-label" for="name">Full Name</label>
+                                            <div class="input-group input-group-lg">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-user"></i></span>
+                                                </div>
+                                                <input type="text" name="name" value="{{ old('name') }}"
+                                                    class="form-control login-control @error('name') is-invalid @enderror"
+                                                    id="name" placeholder="E.g. Dr. John Doe" required>
+                                                @error('name')
+                                                    <span class="invalid-feedback">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label class="form-label" for="email">Work Email</label>
+                                            <div class="input-group input-group-lg">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-envelope"></i></span>
+                                                </div>
+                                                <input type="email" name="email" value="{{ old('email') }}"
+                                                    class="form-control login-control @error('email') is-invalid @enderror"
+                                                    id="email" placeholder="email@glowup.com" required>
+                                                @error('email')
+                                                    <span class="invalid-feedback">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label class="form-label" for="password">Password</label>
+                                                    <div class="input-group input-group-lg">
+                                                        <input type="password" name="password"
+                                                            class="form-control login-control @error('password') is-invalid @enderror"
+                                                            id="password" placeholder="Secure pwd" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label class="form-label" for="password_confirmation">Confirm</label>
+                                                    <div class="input-group input-group-lg">
+                                                        <input type="password" name="password_confirmation"
+                                                            class="form-control login-control" id="password_confirmation"
+                                                            placeholder="Verify pwd" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="custom-control custom-checkbox mb-4 mt-2">
+                                            <input type="checkbox" class="custom-control-input" id="agreeTerms" name="terms"
+                                                value="agree" required>
+                                            <label class="custom-control-label small" for="agreeTerms">I agree to the clinic
+                                                standards and terms.</label>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary btn-lg btn-block login-submit">
+                                            Register account
+                                        </button>
+                                    </form>
+
+                                    <div class="text-center mt-4">
+                                        <a class="small font-weight-bold" href="{{ route('login') }}">
+                                            Already a member? Sign in
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                            <!-- /.col -->
                         </div>
-                    </form>
-
-                    <a href="{{ route('login') }}" class="text-center">I already have a membership</a>
+                    </div>
                 </div>
-                <!-- /.form-box -->
-            </div><!-- /.card -->
-
-            <!-- /.form-box -->
+            </div>
         </div>
-        <!-- /.register-box -->
     </body>
-@endsection
+@endsection()

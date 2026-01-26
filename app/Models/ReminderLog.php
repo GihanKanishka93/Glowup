@@ -8,7 +8,7 @@ class ReminderLog extends Model
 {
     protected $fillable = [
         'reminder_type',
-        'pet_id',
+        'patient_id',
         'treatment_id',
         'vaccination_info_id',
         'owner_email',
@@ -21,11 +21,10 @@ class ReminderLog extends Model
         'sent_at' => 'datetime',
     ];
 
-    public function pet()
+    public function patient()
     {
-        return $this->belongsTo(Pet::class);
+        return $this->belongsTo(Patient::class);
     }
-
     public function treatment()
     {
         return $this->belongsTo(Treatment::class);

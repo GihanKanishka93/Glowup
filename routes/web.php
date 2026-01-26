@@ -14,14 +14,10 @@ use App\Http\Controllers\OccupancyController;
 use App\Http\Controllers\DailyVisitController;
 use App\Http\Controllers\settings\RoleController;
 use App\Http\Controllers\settings\userController;
-use App\Http\Controllers\PetCategoryController;
-use App\Http\Controllers\PetBreedController;
 use App\Http\Controllers\BillingController;
-use App\Http\Controllers\PetController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\DrugController;
 use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\VaccinationController;
 use App\Http\Controllers\TreatmentController;
 use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\Auth\ChangePasswordController;
@@ -65,13 +61,12 @@ Route::group(['middleware' => ['auth']], function () {
 
 
 
-    Route::resource('patient', PatienController::class);
-    Route::resource('pet', PetController::class);
+    Route::resource('patient', \App\Http\Controllers\PatientController::class);
     Route::resource('billing', BillingController::class);
-    Route::post('billing/save-pet-details', [BillingController::class, 'savePetDetails'])->name('billing.save-pet-details');
+    Route::post('billing/save-client-details', [BillingController::class, 'saveClientDetails'])->name('billing.save-client-details');
     Route::post('billing/{id}/email', [BillingController::class, 'emailBill'])->name('billing.email');
     Route::resource('doctor', DoctorController::class);
-    Route::get('ajax/petdetails', [ajaxController::class, 'getPetDetails'])->name('ajax.getPetDetails');
+    Route::get('ajax/petdetails', [ajaxController::class, 'getPatientDetails'])->name('ajax.getPetDetails');
     Route::get('billing/print/{id}', [BillingController::class, 'print'])->name('billing.print');
     Route::get('billing/print-prescription/{id}', [BillingController::class, 'printPrescription'])->name('billing.print-prescription');
     Route::get('/autocomplete/drugs', [DrugController::class, 'autocomplete']);
@@ -79,7 +74,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/get-treatment-details', [TreatmentController::class, 'getTreatmentDetails']);
 
     Route::get('/medical-history/{id}', [TreatmentController::class, 'show'])->name('medical-history.show');
-    Route::get('/get-vaccinations-by-pet-category', [VaccinationController::class, 'getVaccinationsByPetCategory'])->name('ajax.getVaccinationsByPetCategory');
+
 
 
     // Route::get('admission/{id}/editt', [AdmissionController::class,'edit'])->name('admission.editt');
@@ -122,7 +117,6 @@ Route::group(['middleware' => ['auth']], function () {
         // Route::get('province-wise', [reportController::class, 'provinceWise'])->name('report.province-wise');
         Route::get('monthly-report', [reportController::class, 'monthlyReport'])->name('report.monthly-report');
         Route::get('monthly-report-data', [reportController::class, 'billingReport'])->name('report.monthly-report-data');
-        Route::get('vaccination-sales', [reportController::class, 'vaccinationSales'])->name('report.vaccination-sales');
         Route::get('doctor-report', [reportController::class, 'doctorReport'])->name('report.doctor-report');
         Route::get('doctor-report/{doctor}', [reportController::class, 'doctorReportDetail'])->name('report.doctor-report-detail');
         // Route::get('served-periodes', [reportController::class, 'serve'])->name('report.served-periodes');
@@ -156,11 +150,8 @@ Route::group(['middleware' => ['auth']], function () {
 
         Route::resource('room', RoomController::class);
         Route::resource('item', ItemController::class);
-        Route::resource('pet-category', PetCategoryController::class);
-        Route::resource('pet-breed', PetBreedController::class);
-        Route::resource('drug', DrugController::class);
         Route::resource('services', ServiceController::class);
-        Route::resource('vaccination', VaccinationController::class);
+        Route::resource('drug', DrugController::class);
 
         Route::post('/change-password', [ChangePasswordController::class, 'store'])->name('change.password');
         Route::get('/users/profile/', [userController::class, 'profile'])->name('users.profile');

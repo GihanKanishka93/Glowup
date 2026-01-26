@@ -10,6 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        // Keep vets-era schema only if not present; allows smooth transition to skin clinic
+        if (Schema::hasTable('pets')) {
+            return;
+        }
+
         Schema::create('pets', function (Blueprint $table) {
             $table->id();
             $table->timestamps();

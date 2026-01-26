@@ -1,59 +1,77 @@
-<x-laravel-ui-adminlte::adminlte-layout>
+@extends('layouts.public')
+@section('content')
 
-<body class="bg-gradient-login">
-    <div class="container">
-        <div class="row justify-content-center">
-
-            <div class="col-xl-10 col-lg-12 col-md-9">
-
-                <div class="card o-hidden border-0 shadow-lg my-5 card_login">
-                    <div class="card-body p-0">
-                        <!-- Nested Row within Card Body -->
-                        <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block bg-password-image"></div>
-                            <div class="col-lg-6">
-                                <div class="p-5">
-                                    <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-2">Forgot Your Password?</h1>
-                                        <p class="mb-4">We get it, stuff happens. Just enter your email address below
-                                            and we'll send you a link to reset your password!</p>
-                                            @if (session('status'))
-                                            <div class="alert alert-success">
-                                                {{ session('status') }}
-                                            </div>
-                                            @endif
+    <body class="bg-gradient-login login-body">
+        <div class="container login-container">
+            <div class="row justify-content-center">
+                <div class="col-xl-11 col-lg-12">
+                    <div class="login-shell shadow-lg">
+                        <div class="row no-gutters align-items-stretch">
+                            <div class="col-lg-5 d-none d-lg-flex login-visual">
+                                <div class="login-visual-overlay">
+                                    <img src="{{ asset('img/Glowup_Logo-modified.png') }}" alt="Glowup Skin Clinic"
+                                        class="login-logo mb-4">
+                                    <h2 class="login-visual-title">Glowup Skin Clinic</h2>
+                                    <p class="login-visual-subtitle">Password Recovery Workspace</p>
+                                    <ul class="login-highlights list-unstyled mt-4 mb-0">
+                                        <li><i class="fas fa-shield-alt mr-2"></i>Secure automated reset link</li>
+                                        <li><i class="fas fa-key mr-2"></i>Choose a strong new password</li>
+                                        <li><i class="fas fa-user-check mr-2"></i>Instant access after recovery</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-7">
+                                <div class="p-5 login-form">
+                                    <div class="mb-4">
+                                        <p class="eyebrow text-primary mb-1">Reset requested</p>
+                                        <h1 class="login-title mb-2">Forgot Password?</h1>
+                                        <p class="login-copy mb-0">Enter your user name and we'll send you a recovery link.
+                                        </p>
                                     </div>
-                                    <form class="user" action="{{ route('password.email') }}" method="post">
-                                        @csrf
-                                        <div class="form-group">
-                                            <input type="text" class="form-control form-control-user {{ $errors->has('user_name') ? ' is-invalid' : '' }}"
-                                                id="exampleInputEmail" name="user_name" aria-describedby="emailHelp"
-                                                placeholder="Enter User name...">
-                                                @if ($errors->has('user_name'))
-                                                <span class=" invalid-feedback">{{ $errors->first('user_name') }}</span>
-                                                @endif
+
+                                    @if (session('status'))
+                                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                            {{ session('status') }}
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
                                         </div>
-                                        {{-- <a href="login.php" class="btn btn-primary btn-user btn-block">
-                                            Reset Password
-                                        </a> --}}
-                                        <button type="submit" class="btn btn-primary btn-user btn-block"> Reset Password</button>
+                                    @endif
+
+                                    <form class="user" action="{{ route('password.email') }}" method="POST">
+                                        @csrf
+
+                                        <div class="form-group mb-4">
+                                            <label class="form-label" for="loginUserName">User name</label>
+                                            <div class="input-group input-group-lg">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-user"></i></span>
+                                                </div>
+                                                <input type="text" name="user_name" value="{{ old('user_name') }}"
+                                                    class="form-control login-control @error('user_name') is-invalid @enderror"
+                                                    id="loginUserName" placeholder="Your username" required>
+                                                @error('user_name')
+                                                    <span class="invalid-feedback">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary btn-lg btn-block login-submit">
+                                            Send reset link
+                                        </button>
                                     </form>
-                                    <hr>
-                                    <div class="text-center"> 
-                                    </div>
-                                    <div class="text-center">
-                                        <a class="small" href="{{ route('login') }}">Already have an account? Login!</a>
+
+                                    <div class="text-center mt-4">
+                                        <a class="small font-weight-bold" href="{{ route('login') }}">
+                                            <i class="fas fa-arrow-left mr-1"></i> Back to sign in
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
-
         </div>
-
-    </div>
-</body>
-</x-laravel-ui-adminlte::adminlte-layout>
+    </body>
+@endsection()

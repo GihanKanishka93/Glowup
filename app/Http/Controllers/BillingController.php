@@ -8,12 +8,10 @@ use App\Http\Requests\UpdateBillRequest;
 use App\Models\Treatment;
 use App\Models\Bill;
 use App\Models\Doctor;
-use App\Models\Pet;
+use App\Models\Patient;
 use App\Models\BillItem;
 use App\Models\Prescription;
-use App\Models\VaccinationInfo;
 use App\Models\Drug;
-use App\Models\Vaccination;
 use App\Models\Services;
 use App\Models\DosageTypes;
 use App\Models\DurationTypes;
@@ -22,12 +20,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\DataTables\billingDataTable;
 use Illuminate\Support\Facades\Storage;
-use App\Models\PetCategory;
-use App\Models\PetBreed;
 use App\Models\Dose;
 use App\Services\BillingService;
 use App\Mail\NextClinicReminderMail;
-use App\Mail\VaccinationReminderMail;
 use App\Models\ReminderLog;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BillEmail;
@@ -88,7 +83,7 @@ class BillingController extends Controller
                 ->whereRaw('LOWER(payment_type) = ?', ['cash'])
                 ->sum('total');
 
-            $queueBills = Bill::with(['treatment.pet', 'treatment.doctor'])
+            $queueBills = Bill::with(['treatment.patient', 'treatment.doctor'])
                 ->whereNull('bills.deleted_at')
                 ->whereDate('billing_date', '>=', $today)
                 ->where(function ($query) {
@@ -124,12 +119,9 @@ class BillingController extends Controller
 
     public function create()
     {
-        $pets = Pet::all();
+        $patients = Patient::all();
         $doctors = Doctor::all();
-        $petcategory = PetCategory::all();
-        $breed = PetBreed::all();
         $drugs = Drug::all();
-        $vaccine = Vaccination::all();
         $services = Services::all();
         $dosagetypes = DosageTypes::all();
         $dose = Dose::all();
@@ -145,43 +137,38 @@ class BillingController extends Controller
             'revenue_today' => Bill::whereDate('billing_date', $today)->sum('total'),
         ];
 
-        $visitQueue = Treatment::with(['pet', 'doctor'])
+        $visitQueue = Treatment::with(['patient', 'doctor'])
             ->whereDate('treatment_date', $today)
             ->orderByDesc('created_at')
             ->take(6)
             ->get();
 
-        $upcomingVaccinations = VaccinationInfo::with(['treatment.pet', 'vaccine'])
-            ->whereNull('vaccination_infos.deleted_at')
-            ->whereNotNull('next_vacc_date')
-            ->whereBetween('next_vacc_date', [$today, (clone $today)->addDays(7)])
-            ->whereHas('treatment', function ($query) {
-                $query->whereNull('deleted_at')
-                    ->whereHas('bill', function ($billQuery) {
-                        $billQuery->whereNull('deleted_at');
-                    })
-                    ->whereHas('pet', function ($petQuery) {
-                        $petQuery->whereNull('deleted_at');
-                    });
-            })
-            ->orderBy('next_vacc_date')
-            ->take(6)
-            ->get();
+        // Auto-select doctor for authenticated users with medical roles
+        $user = Auth::user();
+        $authenticatedDoctorId = $user->doc_id;
 
-        $recentBills = Bill::with(['treatment.pet'])
+        if (!$authenticatedDoctorId && ($user->hasRole('Doctor') || $user->hasRole('Head Doctor'))) {
+            // Attempt fallback matching by email if doc_id isn't explicitly set
+            $authenticatedDoctorId = Doctor::where('email', $user->email)->value('id');
+        }
+
+
+
+        $recentBills = Bill::with(['treatment.patient'])
             ->latest('billing_date')
             ->take(5)
+            ->get();
+
+        $lowStockItems = Services::whereColumn('stock_quantity', '<=', 'min_stock_level')
+            ->where('min_stock_level', '>', 0)
             ->get();
 
         return view(
             "billing.create",
             compact(
-                "pets",
+                "patients",
                 "doctors",
-                "petcategory",
-                "breed",
                 "drugs",
-                "vaccine",
                 "services",
                 "dosagetypes",
                 "durationtypes",
@@ -189,8 +176,10 @@ class BillingController extends Controller
                 "durationweeks",
                 "metrics",
                 "visitQueue",
-                "upcomingVaccinations",
-                "recentBills"
+
+                "recentBills",
+                "authenticatedDoctorId",
+                "lowStockItems"
             )
         );
     }
@@ -222,20 +211,20 @@ class BillingController extends Controller
     private function sendImmediateReminders(Bill $billing): void
     {
         $treatment = $billing->treatment;
-        $pet = $treatment?->pet;
-        if (!$treatment || !$pet || empty($pet->owner_email)) {
+        $patient = $treatment?->patient;
+        if (!$treatment || !$patient || empty($patient->email)) {
             return;
         }
 
-        $ownerEmail = $pet->owner_email;
+        $ownerEmail = $patient->email;
 
         // Next clinic immediate email
         if (!empty($treatment->next_clinic_date)) {
             try {
-                Mail::to($ownerEmail)->send(new NextClinicReminderMail($pet, $treatment));
+                Mail::to($ownerEmail)->send(new NextClinicReminderMail($patient, $treatment));
                 ReminderLog::create([
                     'reminder_type' => 'next_clinic',
-                    'pet_id' => $pet->id,
+                    'patient_id' => $patient->id,
                     'treatment_id' => $treatment->id,
                     'owner_email' => $ownerEmail,
                     'status' => 'sent',
@@ -244,7 +233,7 @@ class BillingController extends Controller
             } catch (\Throwable $e) {
                 ReminderLog::create([
                     'reminder_type' => 'next_clinic',
-                    'pet_id' => $pet->id,
+                    'patient_id' => $patient->id,
                     'treatment_id' => $treatment->id,
                     'owner_email' => $ownerEmail,
                     'status' => 'failed',
@@ -254,105 +243,45 @@ class BillingController extends Controller
             }
         }
 
-        // Vaccination immediate emails (one per vaccination entry with next date)
-        $vaccinations = $treatment->vaccinations ?? collect();
-        foreach ($vaccinations as $vaccination) {
-            if (empty($vaccination->next_vacc_date)) {
-                continue;
-            }
-            try {
-                Mail::to($ownerEmail)->send(new VaccinationReminderMail($pet, $vaccination));
-                ReminderLog::create([
-                    'reminder_type' => 'vaccination',
-                    'pet_id' => $pet->id,
-                    'treatment_id' => $treatment->id,
-                    'vaccination_info_id' => $vaccination->id,
-                    'owner_email' => $ownerEmail,
-                    'status' => 'sent',
-                    'sent_at' => Carbon::now(),
-                ]);
-            } catch (\Throwable $e) {
-                ReminderLog::create([
-                    'reminder_type' => 'vaccination',
-                    'pet_id' => $pet->id,
-                    'treatment_id' => $treatment->id,
-                    'vaccination_info_id' => $vaccination->id,
-                    'owner_email' => $ownerEmail,
-                    'status' => 'failed',
-                    'error_message' => $e->getMessage(),
-                    'sent_at' => Carbon::now(),
-                ]);
-            }
-        }
+
     }
 
+
     /**
-     * Persist pet/owner updates from the billing form without leaving the page.
+     * Persist client updates from the billing form without leaving the page.
      */
-    public function savePetDetails(Request $request)
+    public function saveClientDetails(Request $request)
     {
         $validated = $request->validate([
-            'pet' => ['required', 'integer', 'exists:pets,id'],
-            'pet_id' => ['nullable', 'string', 'max:255'],
-            'pet_name' => ['nullable', 'string', 'max:255'],
-            'gender' => ['nullable', 'integer'],
-            'age' => ['nullable', 'integer'],
-            'date_of_birth' => ['nullable', 'date'],
-            'weight' => ['nullable', 'numeric'],
-            'colour' => ['nullable', 'string', 'max:255'],
-            'pet_category' => ['nullable', 'integer', 'exists:pet_categories,id'],
-            'breed' => ['nullable', 'integer', 'exists:pet_breeds,id'],
-            'remarks' => ['nullable', 'string'],
-            'owner_name' => ['nullable', 'string', 'max:255'],
-            'owner_contact' => ['nullable', 'string', 'max:25'],
-            'owner_whatsapp' => ['nullable', 'string', 'max:25'],
-            'address' => ['nullable', 'string'],
+            'patient' => ['required', 'integer', 'exists:patients,id'],
+            'nic' => ['nullable', 'string', 'max:20'],
+            'mobile_number' => ['nullable', 'string', 'max:20'],
+            'whatsapp_number' => ['nullable', 'string', 'max:20'],
+            'email' => ['nullable', 'email', 'max:100'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'occupation' => ['nullable', 'string', 'max:100'],
+            'name' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $pet = Pet::findOrFail($validated['pet']);
+        $patient = Patient::findOrFail($validated['patient']);
 
-        $payload = [
-            'pet_id' => $validated['pet_id'] ?? $pet->pet_id,
-            'name' => $validated['pet_name'] ?? $pet->name,
-            'gender' => $validated['gender'] ?? $pet->gender,
-            'age_at_register' => $validated['age'] ?? $pet->age_at_register,
-            'date_of_birth' => $validated['date_of_birth'] ?? $pet->date_of_birth,
-            'weight' => $validated['weight'] ?? $pet->weight,
-            'color' => $validated['colour'] ?? $pet->color,
-            'pet_category' => $validated['pet_category'] ?? $pet->pet_category,
-            'pet_breed' => $validated['breed'] ?? $pet->pet_breed,
-            'remarks' => $validated['remarks'] ?? $pet->remarks,
-            'owner_name' => $validated['owner_name'] ?? $pet->owner_name,
-            'owner_contact' => $validated['owner_contact'] ?? $pet->owner_contact,
-            'owner_whatsapp' => $validated['owner_whatsapp'] ?? $pet->owner_whatsapp,
-            'owner_address' => $validated['address'] ?? $pet->owner_address,
-        ];
+        $patient->fill(array_filter($validated, fn($value) => $value !== null && $value !== ''));
 
-        $filtered = array_filter(
-            $payload,
-            fn ($value) => $value !== null && $value !== ''
-        );
-
-        $pet->fill($filtered);
-
-        if ($pet->isDirty()) {
-            $pet->save();
+        if ($patient->isDirty()) {
+            $patient->save();
         }
 
         return response()->json([
-            'message' => 'Pet details saved',
-            'pet' => $pet->fresh(),
+            'message' => 'Client details saved',
+            'patient' => $patient->fresh(),
         ]);
     }
 
     public function show($bill_id)
     {
-        $pets = Pet::all();
+        $patients = Patient::all();
         $doctors = Doctor::all();
-        $petcategory = PetCategory::all();
-        $breed = PetBreed::all();
         $drugs = Drug::all();
-        $vaccine = Vaccination::all();
         $services = Services::all();
         $dosagetypes = DosageTypes::all();
         $durationtypes = DurationTypes::all();
@@ -362,11 +291,8 @@ class BillingController extends Controller
         $treatment = Treatment::findOrFail($bill->treatment_id);
         $billItems = BillItem::where('bill_id', $bill->id)->get();
         $prescriptions = Prescription::where('trement_id', $bill->treatment_id)->get();
-        $vaccinationInfo = VaccinationInfo::where('trement_id', $bill->treatment_id)->get();
-        //$pet = Pet::findOrFail($bill->pet_id);
 
-
-        return view('billing.show', compact("pets", "doctors", "petcategory", "breed", "drugs", "vaccine", "services", "dosagetypes", "durationtypes", "durationweeks", "bill", "treatment", "billItems", "prescriptions", "vaccinationInfo"));
+        return view('billing.show', compact("patients", "doctors", "drugs", "services", "dosagetypes", "durationtypes", "durationweeks", "bill", "treatment", "billItems", "prescriptions"));
     }
 
     /**
@@ -374,10 +300,8 @@ class BillingController extends Controller
      */
     public function edit($bid)
     {
-        $pets = Pet::all();
+        $patients = Patient::all();
         $doctors = Doctor::all();
-        $petcategory = PetCategory::all();
-        $breed = PetBreed::all();
         $drugs = Drug::all();
 
         $services = Services::all();
@@ -386,27 +310,11 @@ class BillingController extends Controller
         $durationtypes = DurationTypes::all();
         $durationweeks = DurationWeeks::all();
 
-        $bill = Bill::findOrFail($bid);
-        $treatment = Treatment::findOrFail($bill->treatment_id);
-        $billItems = BillItem::where('bill_id', $bill->id)->get();
-        $pet_category_value = empty($treatment->pet->pet_category) ? 20 : $treatment->pet->pet_category;
+        $lowStockItems = Services::whereColumn('stock_quantity', '<=', 'min_stock_level')
+            ->where('min_stock_level', '>', 0)
+            ->get();
 
-
-        if ($pet_category_value != 20) {
-            $vaccine = Vaccination::whereJsonContains('pet_category', (string) $pet_category_value)->get();
-        } else {
-            $vaccine = Vaccination::all();
-        }
-
-        // echo $treatment->pet->pet_category;
-        // dd($vaccine);
-        $prescriptions = Prescription::where('trement_id', $bill->treatment_id)->get();
-        $vaccinationInfo = VaccinationInfo::where('trement_id', $bill->treatment_id)->get();
-        //$pet = Pet::findOrFail($bill->pet_id);
-        // echo "sadasd";
-        // die;
-
-        return view('billing.edit', compact("pets", "doctors", "petcategory", "breed", "drugs", "vaccine", "services", "dosagetypes", "durationweeks", "durationtypes", "dose", "bill", "treatment", "billItems", "prescriptions", "vaccinationInfo"));
+        return view('billing.edit', compact("patients", "doctors", "drugs", "services", "dosagetypes", "durationweeks", "durationtypes", "dose", "bill", "treatment", "billItems", "prescriptions", "lowStockItems"));
     }
     public function update(UpdateBillRequest $request, $id)
     {
@@ -423,14 +331,14 @@ class BillingController extends Controller
 
     public function print(Request $request)
     {
-        // Fetch billing data with related pet and treatment details
-        $billing_data = Bill::with(['treatment.pet', 'treatment.doctor'])->where('id', $request->id)->firstOrFail();
+        // Fetch billing data with related patient and treatment details
+        $billing_data = Bill::with(['treatment.patient', 'treatment.doctor'])->where('id', $request->id)->firstOrFail();
 
         // Hospital information
         $hospital_info = [
-            'name' => 'Challenger Vet Animal Hospital',
+            'name' => 'Glow Up Skin Care & Cosmetics',
             'address' => 'Kottawa, Sri Lanka',
-            'phone' => '011-2197400'
+            'phone' => '070-3843481'
         ];
 
         // Prepare data for the view
@@ -439,7 +347,7 @@ class BillingController extends Controller
             'billing_data' => $billing_data,
             'billing_items' => $billing_data->BillItems,
             'date' => date('Y-m-d'),
-            'pet' => $billing_data->treatment->pet,
+            'patient' => $billing_data->treatment->patient,
             'treatment' => $billing_data->treatment,
             'doctor' => $billing_data->treatment->doctor,
             'title' => 'Billing Details',
@@ -460,7 +368,7 @@ class BillingController extends Controller
 
     public function emailBill(Request $request, $id)
     {
-        $billing = Bill::with(['treatment.pet', 'treatment.doctor', 'BillItems'])->findOrFail($id);
+        $billing = Bill::with(['treatment.patient', 'treatment.doctor', 'BillItems'])->findOrFail($id);
         $result = $this->emailBillInternal($billing);
         if ($result !== true) {
             return redirect()->back()->with('danger', $result);
@@ -470,16 +378,16 @@ class BillingController extends Controller
 
     private function emailBillInternal(Bill $billing): bool|string
     {
-        $pet = $billing->treatment?->pet;
+        $patient = $billing->treatment?->patient;
 
-        if (!$pet || empty($pet->owner_email)) {
-            return 'Owner email is missing. Please add an email to send the bill.';
+        if (!$patient || empty($patient->email)) {
+            return 'Patient email is missing. Please add an email to send the bill.';
         }
 
         $hospital_info = [
-            'name' => 'Challenger Vet Animal Hospital',
+            'name' => 'Glow Up Skin Care & Cosmetics',
             'address' => 'Kottawa, Sri Lanka',
-            'phone' => '011-2197400'
+            'phone' => '070-3843481'
         ];
 
         $data = [
@@ -487,7 +395,7 @@ class BillingController extends Controller
             'billing_data' => $billing,
             'billing_items' => $billing->BillItems,
             'date' => date('Y-m-d'),
-            'pet' => $billing->treatment->pet,
+            'patient' => $billing->treatment->patient,
             'treatment' => $billing->treatment,
             'doctor' => $billing->treatment->doctor,
             'title' => 'Billing Details',
@@ -499,7 +407,7 @@ class BillingController extends Controller
         $pdfContent = $pdf->output();
 
         try {
-            Mail::to($pet->owner_email)->send(new BillEmail($billing, $pdfContent));
+            Mail::to($patient->email)->send(new BillEmail($billing, $pdfContent));
         } catch (\Throwable $e) {
             return 'Failed to send email: ' . $e->getMessage();
         }
@@ -509,14 +417,14 @@ class BillingController extends Controller
 
     public function printPrescription(Request $request)
     {
-        // Fetch billing data with related pet and treatment details
-        $billing_data = Bill::with(['treatment.pet', 'treatment.doctor', 'treatment.prescription'])->where('id', $request->id)->firstOrFail();
+        // Fetch billing data with related patient and treatment details
+        $billing_data = Bill::with(['treatment.patient', 'treatment.doctor', 'treatment.prescription'])->where('id', $request->id)->firstOrFail();
         $prescription_details = Prescription::where('trement_id', $billing_data->treatment_id)->get();
         // Hospital information
         $hospital_info = [
-            'name' => 'Challenger Vet Animal Hospital',
+            'name' => 'Glow Up Skin Care & Cosmetics',
             'address' => 'Kottawa, Sri Lanka',
-            'phone' => '011-2197400'
+            'phone' => '070-3843481'
         ];
 
         // Prepare data for the view
@@ -525,7 +433,7 @@ class BillingController extends Controller
             'billing_data' => $billing_data,
             'billing_items' => $billing_data->BillItems,
             'date' => date('Y-m-d'),
-            'pet' => $billing_data->treatment->pet,
+            'patient' => $billing_data->treatment->patient,
             'treatment' => $billing_data->treatment,
             'prescription' => $prescription_details,
             'doctor' => $billing_data->treatment->doctor,
@@ -545,6 +453,9 @@ class BillingController extends Controller
     {
         // Find the bill by its ID
         $bill = Bill::findOrFail($id);
+
+        // Restore stock levels before deletion
+        $this->billingService->restoreStock($bill);
 
         // Update the deleted_by field for the bill
         $bill->update([
@@ -567,7 +478,7 @@ class BillingController extends Controller
             $billItem->delete();
         }
 
-        VaccinationInfo::where('trement_id', $bill->treatment_id)->delete();
+
 
         // Soft delete the Bill itself
         $bill->delete();

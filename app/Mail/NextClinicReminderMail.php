@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\Pet;
+use App\Models\Patient;
 use App\Models\Treatment;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
@@ -14,7 +14,7 @@ class NextClinicReminderMail extends Mailable
     use Queueable, SerializesModels;
 
     public function __construct(
-        public Pet $pet,
+        public Patient $patient,
         public Treatment $treatment
     ) {
     }
@@ -22,7 +22,7 @@ class NextClinicReminderMail extends Mailable
     public function build()
     {
         $clinicName = config('app.name');
-        $subject = "Follow-up reminder for {$this->pet->name}";
+        $subject = "Follow-up reminder for {$this->patient->name}";
 
         $nextClinicDate = $this->treatment->next_clinic_date;
         $dateFormatted = $nextClinicDate ? Carbon::parse($nextClinicDate)->format('Y-m-d') : null;
@@ -35,7 +35,7 @@ class NextClinicReminderMail extends Mailable
             ->replyTo(config('reminders.reply_to') ?? $fromEmail, $fromName)
             ->view('emails.reminders.next-clinic')
             ->with([
-                'pet' => $this->pet,
+                'patient' => $this->patient,
                 'treatment' => $this->treatment,
                 'clinicName' => $clinicName,
                 'nextClinicDate' => $dateFormatted,

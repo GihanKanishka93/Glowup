@@ -31,9 +31,9 @@ class BillingDataTable extends DataTable
                 }
 
                 $query->where(function ($q) use ($searchValue) {
-                    $q->whereHas('treatment.pet', function ($q) use ($searchValue) {
+                    $q->whereHas('treatment.patient', function ($q) use ($searchValue) {
                         $q->where('name', 'like', '%' . $searchValue . '%')
-                            ->whereNull('pets.deleted_at'); // Exclude soft-deleted pets
+                            ->whereNull('patients.deleted_at'); // Exclude soft-deleted patients
                     })
                         ->orWhereHas('treatment.doctor', function ($q) use ($searchValue) {
                             $q->where('name', 'like', '%' . $searchValue . '%')
@@ -48,24 +48,24 @@ class BillingDataTable extends DataTable
                                 ->whereNull('bi.deleted_at')
                                 ->whereColumn('bi.bill_id', 'bills.id')
                                 ->where(function ($serviceQuery) use ($searchValue) {
-                                    $serviceQuery->where('bi.item_name', 'like', '%' . $searchValue . '%')
-                                        ->orWhereExists(function ($svc) use ($searchValue) {
-                                            $svc->select(DB::raw(1))
-                                                ->from('services as s')
-                                                ->whereNull('s.deleted_at')
-                                                ->whereColumn('s.name', 'bi.item_name')
-                                                ->where('s.name', 'like', '%' . $searchValue . '%');
-                                        });
-                                });
+                                $serviceQuery->where('bi.item_name', 'like', '%' . $searchValue . '%')
+                                    ->orWhereExists(function ($svc) use ($searchValue) {
+                                        $svc->select(DB::raw(1))
+                                            ->from('services as s')
+                                            ->whereNull('s.deleted_at')
+                                            ->whereColumn('s.name', 'bi.item_name')
+                                            ->where('s.name', 'like', '%' . $searchValue . '%');
+                                    });
+                            });
                         })
                         ->orWhereExists(function ($sub) use ($searchValue) {
                             // Match vaccination names tied to the treatment
                             $sub->select(DB::raw(1))
                                 ->from('vaccination_infos as vi')
                                 ->join('vaccinations as v', function ($join) {
-                                    $join->on('v.id', '=', 'vi.vaccine_id')
-                                        ->whereNull('v.deleted_at');
-                                })
+                                $join->on('v.id', '=', 'vi.vaccine_id')
+                                    ->whereNull('v.deleted_at');
+                            })
                                 ->whereNull('vi.deleted_at')
                                 ->whereColumn('vi.trement_id', 'bills.treatment_id')
                                 ->where('v.name', 'like', '%' . $searchValue . '%');
@@ -75,8 +75,8 @@ class BillingDataTable extends DataTable
             ->addColumn('id', function ($item) {
                 return '<a href="">' . $item->billing_id . '</a>';
             })
-            ->addColumn('pet_name', function ($item) {
-                return $item->treatment->pet->name ?? 'N/A';
+            ->addColumn('patient_name', function ($item) {
+                return $item->treatment->patient->name ?? 'N/A';
             })
             ->addColumn('doctor_name', function ($item) {
                 return $item->treatment->doctor->name ?? 'N/A';
@@ -142,8 +142,8 @@ class BillingDataTable extends DataTable
                     $btn .= '<a class="btn text-white btn-sm" href="' . route('billing.print-prescription', ['id' => $item->id]) . '" target="_blank" data-bs-toggle="tooltip" title="Print Prescription"><i title="Print Prescription" class="fas fa-file-prescription" style="color: #B197FC;"></i></a>&nbsp;';
                 }
                 // if ($user->can('bill-edit')) {
-                //     $btn .= '<a class="btn text-white btn-sm medical-history-btn" href="' . route('medical-history.show', ['id' => $item->treatment->pet_id]) . '" data-bs-toggle="tooltip" title="Medical History"><i title="Medical History" class="fa-solid fa-file fa-2xl" style="color: #B197FC;"></i></a>&nbsp;';
-
+                //     $btn .= '<a class="btn text-white btn-sm medical-history-btn" href="' . route('medical-history.show', ['id' => $item->treatment->patient_id]) . '" data-bs-toggle="tooltip" title="Medical History"><i title="Medical History" class="fa-solid fa-file fa-2xl" style="color: #B197FC;"></i></a>&nbsp;';
+    
                 // }
                 if ($user->can('bill-delete')) {
                     // if ($item->admissions()->whereNull('date_of_check_out')->count() == 0) {
@@ -202,7 +202,7 @@ class BillingDataTable extends DataTable
         // Start with the base query and include necessary relationships
         $query = $model->newQuery()
             ->with([
-                'treatment.pet',
+                'treatment.patient',
                 'treatment.doctor',
             ])
             ->whereNull('bills.deleted_at'); // Exclude soft-deleted records
@@ -214,9 +214,9 @@ class BillingDataTable extends DataTable
                     $query->orderBy('bills.billing_date', $orderByDirection);
                     break;
                 case 2:
-                    $query->orderBy(Treatment::select('pets.name')
-                        ->join('pets', 'pets.id', '=', 'treatments.pet_id')
-                        ->whereNull('pets.deleted_at') // Exclude soft-deleted pets
+                    $query->orderBy(Treatment::select('patients.name')
+                        ->join('patients', 'patients.id', '=', 'treatments.patient_id')
+                        ->whereNull('patients.deleted_at') // Exclude soft-deleted patients
                         ->whereColumn('treatments.id', 'bills.treatment_id'), $orderByDirection);
                     break;
                 case 3:
@@ -267,7 +267,7 @@ class BillingDataTable extends DataTable
         return [
             Column::make('DT_RowIndex')->title('#')->searchable(false)->orderable(false),
             Column::make('billing_id')->title('Billing ID')->orderable(true)->searchable(true),
-            Column::make('pet_name')->title('Client Name')->orderable(true)->searchable(true),
+            Column::make('patient_name')->title('Patient Name')->orderable(true)->searchable(true),
             Column::make('doctor_name')->title('Doctor Name')->orderable(true)->searchable(true),
             Column::make('billing_date')->title('Billing Date')->orderable(true)->searchable(true),
             Column::make('total')->title('Bill Amount')->orderable(true)->searchable(true),

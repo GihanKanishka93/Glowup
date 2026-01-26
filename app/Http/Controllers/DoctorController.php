@@ -91,7 +91,7 @@ class DoctorController extends Controller
         $treatmentsBase = Treatment::where('doctor_id', $doctor->id);
 
         $totalTreatments = (clone $treatmentsBase)->count();
-        $patientsServed = (clone $treatmentsBase)->distinct('pet_id')->count('pet_id');
+        $patientsServed = (clone $treatmentsBase)->distinct('patient_id')->count('patient_id');
         $lastTreatment = (clone $treatmentsBase)->orderByDesc('treatment_date')->first();
         $lastActiveDate = $safeParse($lastTreatment?->treatment_date);
 
@@ -109,9 +109,12 @@ class DoctorController extends Controller
             ->count();
 
         $recentTreatments = (clone $treatmentsBase)
-            ->with(['pet' => function ($relation) {
-                $relation->withTrashed();
-            }, 'bill'])
+            ->with([
+                'patient' => function ($relation) {
+                    $relation->withTrashed();
+                },
+                'bill'
+            ])
             ->orderByDesc('treatment_date')
             ->limit(10)
             ->get()

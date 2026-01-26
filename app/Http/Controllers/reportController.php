@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Doctor;
-use App\Models\Pet;
+use App\Models\Patient;
 use App\Models\Treatment;
 use App\Models\Bill;
 use App\Models\Services;
@@ -32,11 +32,11 @@ class reportController extends Controller
     public function monthlyReport(Request $request, monthlyReportDataTable $dataTable)
     {
 
-        $pets = Pet::all();
+        $patients = Patient::all();
         $doctors = Doctor::all();
 
         $selectedDoctorId = $request->input('doctor_id');
-        $selectedPetId = $request->input('pet_id');
+        $selectedPatientId = $request->input('patient_id');
 
         $startDateInput = $request->input('start_date');
         $endDateInput = $request->input('end_date');
@@ -58,10 +58,10 @@ class reportController extends Controller
             });
         }
 
-        if (!empty($selectedPetId)) {
-            $filteredBillsQuery->whereHas('treatment.pet', function ($q) use ($selectedPetId) {
-                $q->where('pets.id', $selectedPetId)
-                    ->whereNull('pets.deleted_at');
+        if (!empty($selectedPatientId)) {
+            $filteredBillsQuery->whereHas('treatment.patient', function ($q) use ($selectedPatientId) {
+                $q->where('patients.id', $selectedPatientId)
+                    ->whereNull('patients.deleted_at');
             });
         }
 
@@ -74,7 +74,7 @@ class reportController extends Controller
             ->whereNull('b.deleted_at')
             ->whereBetween('b.billing_date', [$rangeStart, $rangeEnd]);
 
-        if ($selectedDoctorId || $selectedPetId) {
+        if ($selectedDoctorId || $selectedPatientId) {
             $dailyBreakdownQuery->leftJoin('treatments as t', function ($join) {
                 $join->on('t.id', '=', 'b.treatment_id')
                     ->whereNull('t.deleted_at');
@@ -89,12 +89,12 @@ class reportController extends Controller
             $dailyBreakdownQuery->where('d.id', $selectedDoctorId);
         }
 
-        if ($selectedPetId) {
-            $dailyBreakdownQuery->leftJoin('pets as p', function ($join) {
-                $join->on('p.id', '=', 't.pet_id')
+        if ($selectedPatientId) {
+            $dailyBreakdownQuery->leftJoin('patients as p', function ($join) {
+                $join->on('p.id', '=', 't.patient_id')
                     ->whereNull('p.deleted_at');
             });
-            $dailyBreakdownQuery->where('p.id', $selectedPetId);
+            $dailyBreakdownQuery->where('p.id', $selectedPatientId);
         }
 
         $dailyBreakdown = $dailyBreakdownQuery
@@ -125,12 +125,12 @@ class reportController extends Controller
             ->whereNull('b.deleted_at')
             ->whereBetween('b.billing_date', [$rangeStart, $rangeEnd]);
 
-        if ($selectedPetId) {
-            $doctorBreakdownQuery->leftJoin('pets as p', function ($join) {
-                $join->on('p.id', '=', 't.pet_id')
+        if ($selectedPatientId) {
+            $doctorBreakdownQuery->leftJoin('patients as p', function ($join) {
+                $join->on('p.id', '=', 't.patient_id')
                     ->whereNull('p.deleted_at');
             });
-            $doctorBreakdownQuery->where('p.id', $selectedPetId);
+            $doctorBreakdownQuery->where('p.id', $selectedPatientId);
         }
 
         if ($selectedDoctorId) {
@@ -169,14 +169,14 @@ class reportController extends Controller
             'start_date' => $startDate->toDateString(),
             'end_date' => $endDate->toDateString(),
             'doctor_id' => $selectedDoctorId,
-            'pet_id' => $selectedPetId,
+            'patient_id' => $selectedPatientId,
         ]);
 
         return $dataTable->render('reports.monthly-report', [
-            'pets' => $pets,
+            'patients' => $patients,
             'doctors' => $doctors,
             'selectedDoctorId' => $selectedDoctorId,
-            'selectedPetId' => $selectedPetId,
+            'selectedPatientId' => $selectedPatientId,
             'startDate' => $startDate->toDateString(),
             'endDate' => $endDate->toDateString(),
             'billCount' => $billCount,
@@ -464,11 +464,11 @@ class reportController extends Controller
             ->get();
 
         $recentInvoices = (clone $baseBillQuery)
-            ->leftJoin('pets as p', function ($join) {
-                $join->on('p.id', '=', 't.pet_id')
+            ->leftJoin('patients as p', function ($join) {
+                $join->on('p.id', '=', 't.patient_id')
                     ->whereNull('p.deleted_at');
             })
-            ->select('b.id', 'b.billing_id', 'b.total', 'b.billing_date', 'p.name as pet_name')
+            ->select('b.id', 'b.billing_id', 'b.total', 'b.billing_date', 'p.name as patient_name')
             ->orderByDesc('b.billing_date')
             ->orderByDesc('b.created_at')
             ->limit(10)
@@ -489,91 +489,6 @@ class reportController extends Controller
 
     public function vaccinationSales(Request $request)
     {
-        $request->validate([
-            'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
-        ]);
-
-        $startDateInput = $request->input('start_date');
-        $endDateInput = $request->input('end_date');
-
-        $startDate = $startDateInput ? Carbon::parse($startDateInput) : Carbon::now()->startOfYear();
-        $endDate = $endDateInput ? Carbon::parse($endDateInput) : Carbon::now();
-
-        $rangeStart = $startDate->copy()->startOfDay();
-        $rangeEnd = $endDate->copy()->endOfDay();
-
-        $vaccinationCounts = DB::table('vaccination_infos as vi')
-            ->join('vaccinations as v', function ($join) {
-                $join->on('v.id', '=', 'vi.vaccine_id')
-                    ->whereNull('v.deleted_at');
-            })
-            ->join('treatments as t', function ($join) {
-                $join->on('t.id', '=', 'vi.trement_id')
-                    ->whereNull('t.deleted_at');
-            })
-            ->join('bills as b', function ($join) {
-                $join->on('b.treatment_id', '=', 't.id')
-                    ->whereNull('b.deleted_at');
-            })
-            ->whereNull('vi.deleted_at')
-            ->where(function ($query) use ($rangeStart, $rangeEnd) {
-                // Use billing_date when present, otherwise fall back to created_at.
-                $query->whereBetween('b.billing_date', [$rangeStart, $rangeEnd])
-                    ->orWhere(function ($sub) use ($rangeStart, $rangeEnd) {
-                        $sub->whereNull('b.billing_date')
-                            ->whereBetween('b.created_at', [$rangeStart, $rangeEnd]);
-                    });
-            })
-            ->select('vi.vaccine_id', DB::raw('COUNT(vi.id) as vaccination_count'))
-            ->groupBy('vi.vaccine_id');
-
-        $serviceCounts = DB::table('bill_items as bi')
-            ->join('bills as b', function ($join) {
-                $join->on('b.id', '=', 'bi.bill_id')
-                    ->whereNull('b.deleted_at');
-            })
-            ->join('vaccinations as v', function ($join) {
-                // Match service name exactly to vaccine name
-                $join->on('v.name', '=', 'bi.item_name')
-                    ->whereNull('v.deleted_at');
-            })
-            ->whereNull('bi.deleted_at')
-            ->where(function ($query) use ($rangeStart, $rangeEnd) {
-                $query->whereBetween('b.billing_date', [$rangeStart, $rangeEnd])
-                    ->orWhere(function ($sub) use ($rangeStart, $rangeEnd) {
-                        $sub->whereNull('b.billing_date')
-                            ->whereBetween('b.created_at', [$rangeStart, $rangeEnd]);
-                    });
-            })
-            ->select('v.id as vaccine_id', DB::raw('COUNT(bi.id) as service_count'))
-            ->groupBy('v.id');
-
-        $vaccinationBreakdown = DB::table('vaccinations as v')
-            ->whereNull('v.deleted_at')
-            ->leftJoinSub($vaccinationCounts, 'vi_counts', function ($join) {
-                $join->on('vi_counts.vaccine_id', '=', 'v.id');
-            })
-            ->leftJoinSub($serviceCounts, 'svc_counts', function ($join) {
-                $join->on('svc_counts.vaccine_id', '=', 'v.id');
-            })
-            ->select(
-                'v.name',
-                DB::raw('COALESCE(vi_counts.vaccination_count, 0) as vaccination_count'),
-                DB::raw('COALESCE(svc_counts.service_count, 0) as service_count'),
-                DB::raw('(COALESCE(vi_counts.vaccination_count, 0) + COALESCE(svc_counts.service_count, 0)) as sold_count')
-            )
-            ->having('sold_count', '>', 0)
-            ->orderByDesc('sold_count')
-            ->get();
-
-        $totalVaccinations = $vaccinationBreakdown->sum('sold_count');
-
-        return view('reports.vaccination-sales', [
-            'startDate' => $rangeStart->toDateString(),
-            'endDate' => $rangeEnd->toDateString(),
-            'vaccinationBreakdown' => $vaccinationBreakdown,
-            'totalVaccinations' => $totalVaccinations,
-        ]);
+        return redirect()->back();
     }
 }

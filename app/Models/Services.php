@@ -13,5 +13,8 @@ class Services extends Model
     protected $fillable = [
         'name',
         'price',
+        'stock_quantity',
+        'min_stock_level',
+        'unit',
     ];
 }

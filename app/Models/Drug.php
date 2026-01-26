@@ -11,6 +11,9 @@ class Drug extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name'
+        'name',
+        'stock_quantity',
+        'min_stock_level',
+        'unit',
     ];
 }

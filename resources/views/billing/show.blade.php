@@ -143,7 +143,7 @@ body.theme-dark .bg-gray-200 {
                     <span class="text">Email Bill</span>
                 </button>
             </form>
-            <a href="{{ route('medical-history.show', ['id' => $treatment->pet_id]) }}" target="_blank" class="btn btn-md btn-primary btn-icon-split ml-2 medical-history-btn">
+            <a href="{{ route('medical-history.show', ['id' => $treatment->patient_id]) }}" target="_blank" class="btn btn-md btn-primary btn-icon-split ml-2 medical-history-btn">
                 <span class="icon text-white-50">
                     <i class="fa fa-file"></i>
                 </span>
@@ -158,7 +158,7 @@ body.theme-dark .bg-gray-200 {
         <div class="col-xl-12 col-lg-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-4 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold ">Client : {{ $treatment->pet->name }} </h6>
+                    <h6 class="m-0 font-weight-bold ">Patient : {{ $treatment->patient->name }} </h6>
                     <div class="dropdown no-arrow show">
                        Billing Date :  {{ $bill->billing_date }}
                     </div>
@@ -173,7 +173,7 @@ body.theme-dark .bg-gray-200 {
                         <div class="basic-information">
                             <div class="info-row">
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>Client Name:</strong> {{ $treatment->pet->name }}</p>
+                                    <p><strong>Patient Name:</strong> {{ $treatment->patient->name }}</p>
                                 </div>
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
                                      <p><strong>Doctor Name:</strong> {{ $treatment->doctor->name }}</p>
@@ -182,64 +182,56 @@ body.theme-dark .bg-gray-200 {
 
                             <div class="info-row">
                                 <div class="col-xl-6 col-lg-6">
-                                    <p><strong>Client ID:</strong> {{ $treatment->pet->pet_id }}</p>
+                                    <p><strong>Patient ID:</strong> {{ $treatment->patient->patient_id }}</p>
                                 </div>
                                 <div class="col-xl-6 col-lg-6">
-                                    <p><strong>Date of Birth:</strong> {{ $treatment->pet->date_of_birth }}</p>
+                                    <p><strong>Date of Birth:</strong> {{ $treatment->patient->date_of_birth }}</p>
                                 </div>
                             </div>
                             <div class="info-row">
                                 <div class="col-xl-6 col-lg-6">
-                                  <p><strong>Age:</strong> {{ $treatment->pet->age_at_register }}</p>
-                                </div>
-
-                                <div class="col-xl-6 col-lg-6">
-                                 <p><strong>Skin Type:</strong> {{ $treatment->pet->petcategory->name ?? '-' }}</p>
+                                  <p><strong>Age:</strong> {{ $treatment->patient->age }}</p>
                                 </div>
 
+                                <div class="col-xl-6 col-lg-6">
+                                 <p><strong>NIC:</strong> {{ $treatment->patient->nic ?? '-' }}</p>
+                                </div>
+
                             </div>
                             <div class="info-row">
                                 <div class="col-xl-6 col-lg-6">
-                                <p><strong>Breed:</strong>@if(isset($treatment->pet->petbreed->name)) {{ $treatment->pet->petbreed->name }} @endif</p>
+                                <p><strong>Occupation:</strong> {{ $treatment->patient->occupation ?? '-' }}</p>
                             </div>
                                 <div class="col-xl-6 col-lg-6">
-                                <p><strong>Gender:</strong> {{ $treatment->pet->gender == 1 ? 'Male' : 'Female' }}</p>
-                            </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="col-xl-6 col-lg-6">
-                                <p><strong>Weight:</strong> {{ $treatment->pet->weight }}</p>
-                            </div>
-                                <div class="col-xl-6 col-lg-6">
-                                <p><strong>Color:</strong> {{ $treatment->pet->color }}</p>
+                                <p><strong>Gender:</strong> {{ $treatment->patient->gender == 1 ? 'Male' : 'Female' }}</p>
                             </div>
                             </div>
                             <div class="info-row">
                                 <div class="col-xl-6 col-lg-6">
-                                <p><strong>Remarks:</strong> {{ $treatment->pet->remarks }}</p>
+                                <p><strong>Remarks:</strong> {{ $treatment->patient->remarks }}</p>
                             </div>
                             </div>
                         </div>
 
 
-                        <legend class="bg-gray-200 p-1 pl-lg-4">Owner Information</legend>
+                        <legend class="bg-gray-200 p-1 pl-lg-4">Contact Information</legend>
                         <br>
                         <div class="owner-information">
                             <div class="info-row">
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>Name:</strong> {{ $treatment->pet->owner_name }}</p>
+                                    <p><strong>Email:</strong> {{ $treatment->patient->email }}</p>
                                 </div>
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>Contact Number:</strong> {{ $treatment->pet->owner_contact }}</p>
+                                    <p><strong>Contact Number:</strong> {{ $treatment->patient->mobile_number }}</p>
                                 </div>
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>WhatsApp:</strong> {{ $treatment->pet->owner_whatsapp ?? '—' }}</p>
+                                    <p><strong>WhatsApp:</strong> {{ $treatment->patient->whatsapp_number ?? '—' }}</p>
                                 </div>
                             </div>
 
                             <div class="info-row">
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>Address:</strong> {{ $treatment->pet->owner_address }}</p>
+                                    <p><strong>Address:</strong> {{ $treatment->patient->address }}</p>
                                 </div>
                             </div>
                         </div>
@@ -298,41 +290,7 @@ body.theme-dark .bg-gray-200 {
                         <br>
 
 
-                        <legend class="bg-gray-200 p-1 pl-lg-4">Vaccination</legend>
-                        <br/>
-                        <div class="vaccinationa-info">
-                            <div id="vaccination" class="mt-4">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Vaccine Name</th>
-                                            <th>Duration</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($vaccinationInfo as $vaccination)
-                                        <tr id="vaccination-{{ $vaccination->id }}">
-                                            <td>{{ optional($vaccination->vaccine)->name ?? 'Not available' }}</td>
-                                            <td>
-                                                @if(!empty($vaccination->next_vacc_date))
-                                                {{ $vaccination->next_vacc_date }}
-                                            @endif
 
-                                            @if(!empty($vaccination->next_vacc_weeks))
-                                                @if(!empty($vaccination->next_vacc_date))
-                                                &nbsp; / &nbsp;
-                                                @endif
-                                                {{ $vaccination->next_vacc_weeks }}
-                                            @endif
-
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <br>
 
                             <div class="basic-information">
                                 <div class="info-row">

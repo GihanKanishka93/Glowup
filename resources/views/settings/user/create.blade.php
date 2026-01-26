@@ -12,6 +12,33 @@
                 <form action="{{ route('users.store') }}" method="post">
                     @csrf
                     <div class="card-body">
+                        <!-- Auto-fill from Doctor Section -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Tip:</strong> If this user is an existing doctor, select them below to auto-fill their details.
+                        </div>
+                        
+                        <div class="form-group row">
+                            <label class="col-sm-2" for="auto_fill_doctor">Load Doctor Details:</label>
+                            <div class="col-sm-8">
+                                <select id="auto_fill_doctor" class="form-control select2">
+                                    <option value="">-- Select a doctor to auto-fill --</option>
+                                    @foreach ($doctor as $item)
+                                        <option value="{{ $item->id }}" 
+                                            data-name="{{ $item->name }}"
+                                            data-email="{{ $item->email }}"
+                                            data-contact="{{ $item->contact_no }}"
+                                            data-designation="{{ $item->designation }}">
+                                            {{ $item->name }} ({{ $item->contact_no }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">This will populate the form fields below with the doctor's information.</small>
+                            </div>
+                        </div>
+
+                        <hr>
+
                         <div class="form-group row">
                             <label class="col-sm-2">First Name: <i class="text-danger">*</i></label>
                             <div class="col-sm-8">
@@ -189,6 +216,45 @@
     <script src="{{ asset('plugin/select2/select2.min.js') }}"></script>
     <script>
         $('.select2').select2();
+
+        // Auto-fill form when doctor is selected
+        $('#auto_fill_doctor').on('change', function() {
+            const selectedOption = $(this).find('option:selected');
+            
+            if (selectedOption.val()) {
+                const doctorName = selectedOption.data('name');
+                const email = selectedOption.data('email');
+                const contact = selectedOption.data('contact');
+                const designation = selectedOption.data('designation');
+                
+                // Split name into first and last
+                const nameParts = doctorName.split(' ');
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
+                
+                // Populate form fields
+                $('#first_name').val(firstName);
+                $('#last_name').val(lastName);
+                $('#email').val(email);
+                $('#contact_number').val(contact);
+                $('#designation').val(designation);
+                
+                // Generate username suggestion from name
+                const usernameSuggestion = doctorName.toLowerCase().replace(/\s+/g, '.');
+                $('#user_name').val(usernameSuggestion);
+                
+                // Show success message
+                toastr.success('Doctor details loaded! Please review and complete the form.');
+            } else {
+                // Clear form if deselected
+                $('#first_name').val('');
+                $('#last_name').val('');
+                $('#email').val('');
+                $('#contact_number').val('');
+                $('#designation').val('');
+                $('#user_name').val('');
+            }
+        });
 
         function getUserRole(){
             var selectedValues =  $('#roles').val();

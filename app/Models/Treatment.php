@@ -12,7 +12,7 @@ class Treatment extends Model
     protected $dates = ['deleted_at'];
 
     protected $fillable = [
-        'pet_id',
+        'patient_id',
         'doctor_id',
         'history_complaint',
         'clinical_observation',
@@ -23,9 +23,9 @@ class Treatment extends Model
         'next_clinic_reminder_sent_at'
     ];
 
-    public function pet()
+    public function patient()
     {
-        return $this->belongsTo(Pet::class)->withTrashed();
+        return $this->belongsTo(Patient::class)->withTrashed();
     }
 
     public function doctor()
@@ -40,10 +40,7 @@ class Treatment extends Model
     {
         return $this->belongsTo(Prescription::class, 'trement_id');
     }
-    public function vaccination()
-    {
-        return $this->belongsTo(VaccinationInfo::class, 'trement_id');
-    }
+
 
     public function bills()
     {
@@ -53,10 +50,5 @@ class Treatment extends Model
     public function prescriptions()
     {
         return $this->hasMany(Prescription::class, 'trement_id');
-    }
-
-    public function vaccinations()
-    {
-        return $this->hasMany(VaccinationInfo::class, 'trement_id');
     }
 }

@@ -36,7 +36,8 @@
                                             <dd class="col-7 fw-semibold">{{ $doctor->name }}</dd>
 
                                             <dt class="col-5 text-muted">Gender</dt>
-                                            <dd class="col-7 text-capitalize">{{ $doctor->gender == 1 ? 'Male' : 'Female' }}</dd>
+                                            <dd class="col-7 text-capitalize">{{ $doctor->gender == 1 ? 'Male' : 'Female' }}
+                                            </dd>
 
                                             <dt class="col-5 text-muted">Designation</dt>
                                             <dd class="col-7">{{ $doctor->designation ?? '—' }}</dd>
@@ -72,10 +73,12 @@
 
                             <div class="col-lg-4">
                                 <div class="card h-100 border-0 shadow-sm">
-                                    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                                    <div
+                                        class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0">Practice Snapshot</h5>
                                         @can('doctor-edit')
-                                            <a href="{{ route('doctor.edit', $doctor->id) }}" class="btn btn-sm btn-outline-primary">
+                                            <a href="{{ route('doctor.edit', $doctor->id) }}"
+                                                class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-edit me-1"></i>Edit
                                             </a>
                                         @endcan
@@ -95,7 +98,7 @@
                                                 <strong>{{ $outstandingBills }}</strong>
                                             </li>
                                             @php
-                                                $nextFollowUpPet = $upcomingFollowUp?->pet?->name;
+                                                $nextFollowUpPet = $upcomingFollowUp?->patient?->name;
                                             @endphp
                                             <li class="d-flex justify-content-between">
                                                 <span class="text-muted">Next follow-up</span>
@@ -122,7 +125,8 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Recent Cases</h5>
-                        <a href="{{ route('billing.index', ['search' => $doctor->doctor_id]) }}" class="btn btn-sm btn-outline-secondary">View Billing Ledger</a>
+                        <a href="{{ route('billing.index', ['search' => $doctor->doctor_id]) }}"
+                            class="btn btn-sm btn-outline-secondary">View Billing Ledger</a>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -141,7 +145,7 @@
                                     @forelse($treatments as $treatment)
                                         <tr>
                                             <td>{{ $treatment->formatted_treatment_date ?? '—' }}</td>
-                                            <td>{{ optional($treatment->pet)->name ?? '—' }}</td>
+                                            <td>{{ optional($treatment->patient)->name ?? '—' }}</td>
                                             <td>{{ $treatment->history_complaint ?: '—' }}</td>
                                             <td>{{ $treatment->formatted_next_visit ?? '—' }}</td>
                                             <td>
@@ -153,12 +157,14 @@
                                             </td>
                                             <td class="text-end">
                                                 @if($treatment->bill)
-                                                    <a href="{{ route('billing.show', $treatment->bill->id) }}" class="btn btn-outline-primary btn-sm">
+                                                    <a href="{{ route('billing.show', $treatment->bill->id) }}"
+                                                        class="btn btn-outline-primary btn-sm">
                                                         <i class="fas fa-receipt me-1"></i>Bill
                                                     </a>
                                                 @endif
-                                                @if($treatment->pet_id)
-                                                    <a href="{{ route('pet.show', $treatment->pet_id) }}" class="btn btn-outline-secondary btn-sm">
+                                                @if($treatment->patient_id)
+                                                    <a href="{{ route('patient.show', $treatment->patient_id) }}"
+                                                        class="btn btn-outline-secondary btn-sm">
                                                         <i class="fas fa-user me-1"></i>Client
                                                     </a>
                                                 @endif
@@ -166,7 +172,8 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="text-center text-muted py-4">No treatments recorded for this doctor yet.</td>
+                                            <td colspan="6" class="text-center text-muted py-4">No treatments recorded for this
+                                                doctor yet.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -190,78 +197,96 @@
             --shadow-sm: 0 12px 24px rgba(15, 23, 42, 0.06);
             color: var(--text-primary);
         }
+
         .doctor-profile .card,
         .doctor-profile .card-body,
         .doctor-profile .card-header {
             background-color: var(--surface) !important;
             color: var(--text-primary);
         }
+
         .doctor-profile .card {
             border: 1px solid var(--border);
             border-radius: 1rem;
             box-shadow: var(--shadow-sm);
         }
+
         .doctor-profile .card-header {
             border-bottom: 1px solid var(--border);
             padding: 1rem 1.25rem;
         }
+
         .doctor-profile .card-body {
             padding: 1.25rem 1.5rem;
         }
+
         .doctor-profile dl dt {
             color: var(--text-muted);
             font-weight: 600;
         }
+
         .doctor-profile dl dd {
             color: var(--text-primary);
         }
+
         .doctor-profile .badge {
             background-color: rgba(29, 78, 216, 0.12);
             color: var(--primary);
         }
+
         .doctor-profile .badge.bg-info {
             background-color: rgba(14, 165, 233, 0.16) !important;
             color: var(--info-contrast) !important;
         }
+
         .doctor-profile .badge.bg-secondary {
             background-color: rgba(148, 163, 184, 0.18) !important;
             color: var(--text-primary) !important;
         }
+
         .doctor-profile .badge.bg-success-subtle {
             background-color: rgba(16, 185, 129, 0.16);
             color: var(--success);
         }
+
         .doctor-profile .table thead th {
             background-color: var(--surface-alt);
             border-bottom: 1px solid var(--border);
             color: var(--text-primary);
         }
+
         .doctor-profile .table tbody tr:nth-child(odd) {
             background-color: rgba(148, 163, 184, 0.12);
         }
+
         .doctor-profile .table tbody td {
             border-color: var(--border);
         }
+
         .doctor-profile .btn-outline-primary {
             color: var(--primary);
             border-color: var(--border);
         }
+
         .doctor-profile .btn-outline-primary:hover,
         .doctor-profile .btn-outline-primary:focus {
             background-color: var(--primary);
             border-color: var(--primary);
             color: var(--primary-contrast);
         }
+
         .doctor-profile .btn-outline-secondary {
             color: var(--text-muted);
             border-color: var(--border);
         }
+
         .doctor-profile .btn-outline-secondary:hover,
         .doctor-profile .btn-outline-secondary:focus {
             background-color: rgba(148, 163, 184, 0.16);
             border-color: rgba(148, 163, 184, 0.45);
             color: var(--text-primary);
         }
+
         .doctor-profile .alert-info {
             background-color: rgba(14, 165, 233, 0.12);
             border: 1px solid rgba(14, 165, 233, 0.35);

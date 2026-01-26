@@ -2,40 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\admission;
+use App\Models\Admission;
 use DateTime;
-use App\Models\room;
-use App\Models\patient;
-use App\Models\Pet;
+use App\Models\Room;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 
 class ajaxController extends Controller
 {
 
-    public function getPetDetails(request $request)
+    public function getPatientDetails(request $request)
     {
 
-        $id = $request->input('pet');
-        $pet = Pet::where('id', $id)->get()->first();
-        if ($pet) {
-            $dob = new DateTime($pet->date_of_birth);
+        $id = $request->input('patient');
+        $patient = Patient::where('id', $id)->get()->first();
+        if ($patient) {
+            $dob = new DateTime($patient->date_of_birth);
             $now = new DateTime();
             $diff = $dob->diff($now);
             $ageYears = $diff->y;
             $ageMonths = $diff->m;
 
             // Add age in years and months to the $patient object
-            $pet->age = "$ageYears years and $ageMonths months";
+            $patient->age = "$ageYears years and $ageMonths months";
         }
 
-        return response()->json($pet);
+        return response()->json($patient);
     }
 
     public function getPetion(request $request)
     {
 
         $id = $request->input('patient');
-        $patient = patient::where('id', $id)->with('address')->get()->first();
+        $patient = Patient::where('id', $id)->get()->first();
         if ($patient) {
             $dob = new DateTime($patient->date_of_birth);
             $now = new DateTime();
@@ -56,7 +55,7 @@ class ajaxController extends Controller
     public function getGuardiants(request $request)
     {
         $id = $request->input('patient');
-        $patient = patient::where('id', $id)->get()->first();
+        $patient = Patient::where('id', $id)->get()->first();
         return response()->json([
             $patient->person
         ]);
@@ -65,7 +64,7 @@ class ajaxController extends Controller
     public function roomItems(request $request)
     {
         $id = $request->input('room');
-        $room = room::where('id', $id)->get()->first();
+        $room = Room::where('id', $id)->get()->first();
         return response()->json([
             $room->item
         ]);
@@ -74,7 +73,7 @@ class ajaxController extends Controller
     public function admissionItems(request $request)
     {
         $id = $request->input('admission');
-        $admission = admission::where('id', $id)->get()->first();
+        $admission = Admission::where('id', $id)->get()->first();
         return response()->json([
             $admission->item
         ]);
