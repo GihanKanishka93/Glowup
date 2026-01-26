@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Room;
 use App\Models\Services;
+use App\Models\Patient;
+use App\Models\Bill;
+use App\Models\Treatment;
 
 class HomeController extends Controller
 {
@@ -36,6 +39,18 @@ class HomeController extends Controller
             $lowStockItems = [];
             $date = $request->date ?? now()->toDateString();
 
+            $stats = [
+                'totalPatients' => Patient::count(),
+                'todayRevenue' => Bill::whereDate('billing_date', today())->sum('total'),
+                'todayConsultations' => Treatment::whereDate('created_at', today())->count(),
+                'newPatientsToday' => Patient::whereDate('created_at', today())->count(),
+            ];
+
+            $recentActivity = Bill::with(['treatment.patient'])
+                ->latest()
+                ->take(5)
+                ->get();
+
             try {
                 if (Schema::hasTable('rooms')) {
                     $floor = Room::all();
@@ -49,7 +64,7 @@ class HomeController extends Controller
                 // Handle case where database isn't fully migrated yet
             }
 
-            return view('home', compact('floor', 'date', 'lowStockItems'));
+            return view('home', compact('floor', 'date', 'lowStockItems', 'stats', 'recentActivity'));
         }
 
         //     $floor = floor::where('id', '>', 1)->orderBy('number')->get();

@@ -14,11 +14,11 @@ class AdminResetEmail extends Mailable
     use Queueable, SerializesModels;
 
 
-    public $user,$password;
+    public $user, $password;
     /**
      * Create a new message instance.
      */
-    public function __construct($user,$password)
+    public function __construct($user, $password)
     {
         $this->user = $user;
         $this->password = $password;
@@ -30,7 +30,7 @@ class AdminResetEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Admin Reset Email',
+            subject: 'Glow Up - Password Reset',
         );
     }
 

@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Mail;
 
@@ -12,12 +12,12 @@ class UserCreatedEmail extends Mailable
     use Queueable, SerializesModels;
 
 
-    public $user,$password;
+    public $user, $password;
 
-    public function __construct($user,$password)
+    public function __construct($user, $password)
     {
         $this->user = $user;
-       $this->password = $password;
+        $this->password = $password;
     }
 
     public function build()
@@ -30,6 +30,6 @@ class UserCreatedEmail extends Mailable
         // $header = 'Your header content goes here';
 
         return $this->markdown('emails.user_created_email')
-                    ->subject('Welcome to Challenger Vet')->with(['user'=>$this->user,'password'=>$this->password]); 
+            ->subject('Welcome to Glow Up Skin Care Clinic')->with(['user' => $this->user, 'password' => $this->password]);
     }
 }
