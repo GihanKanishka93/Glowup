@@ -30,6 +30,10 @@
                             </div>
                             <div class="col-lg-7">
                                 <div class="p-5 login-form">
+                                    <div class="text-center mb-4 d-lg-none">
+                                        <img src="<?php echo e(asset('img/Glowup_Logo-modified.png')); ?>" alt="Glowup Skin Clinic"
+                                            class="login-logo">
+                                    </div>
                                     <div class="d-flex justify-content-between align-items-start mb-4">
                                         <div>
                                             <p class="eyebrow text-primary mb-1">Welcome back</p>

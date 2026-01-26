@@ -1,6 +1,8 @@
 <?php $__env->startSection('content'); ?>
 
-    <body class="bg-gradient-login login-body">
+    <body class="login-body">
+        <!-- Dedicated Animation Backdrop (Isolated from Logo) -->
+        <div class="bg-gradient-login"></div>
         <div class="container login-container">
             <div class="row justify-content-center">
                 <div class="col-xl-11 col-lg-12">
@@ -8,8 +10,12 @@
                         <div class="row no-gutters align-items-stretch">
                             <div class="col-lg-5 d-none d-lg-flex login-visual">
                                 <div class="login-visual-overlay">
-                                    <img src="<?php echo e(asset('img/Glowup_Logo-modified.png')); ?>" alt="Glowup Skin Clinic"
-                                        class="login-logo mb-4">
+                                    <video class="login-logo-video mb-4" autoplay muted playsinline preload="auto"
+                                        poster="<?php echo e(asset('img/Glowup_Logo-modified.png')); ?>"
+                                        aria-label="Glowup Skin Clinic logo animation">
+                                        <source src="<?php echo e(asset('img/Logo_Animation_Video_Ready.mp4')); ?>"
+                                            type="video/mp4">
+                                    </video>
                                     <h2 class="login-visual-title">Glowup Skin Clinic</h2>
                                     <p class="login-visual-subtitle">Password Recovery Workspace</p>
                                     <ul class="login-highlights list-unstyled mt-4 mb-0">
@@ -21,6 +27,10 @@
                             </div>
                             <div class="col-lg-7">
                                 <div class="p-5 login-form">
+                                    <div class="text-center mb-4 d-lg-none">
+                                        <img src="<?php echo e(asset('img/Glowup_Logo-modified.png')); ?>" alt="Glowup Skin Clinic"
+                                            class="login-logo">
+                                    </div>
                                     <div class="mb-4">
                                         <p class="eyebrow text-primary mb-1">Reset requested</p>
                                         <h1 class="login-title mb-2">Forgot Password?</h1>
@@ -76,7 +86,7 @@ unset($__errorArgs, $__bag); ?>
                                     </form>
 
                                     <div class="text-center mt-4">
-                                        <a class="small font-weight-bold" href="<?php echo e(route('login')); ?>">
+                                        <a class="small font-weight-bold" href="<?php echo e(url('/login')); ?>">
                                             <i class="fas fa-arrow-left mr-1"></i> Back to sign in
                                         </a>
                                     </div>
@@ -89,4 +99,5 @@ unset($__errorArgs, $__bag); ?>
         </div>
     </body>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.public', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Users/gihan.finsbury/Downloads/Vet-APP/Glowup/resources/views/auth/passwords/email.blade.php ENDPATH**/ ?>

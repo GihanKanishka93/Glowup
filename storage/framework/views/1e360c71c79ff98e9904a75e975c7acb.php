@@ -4,7 +4,7 @@
         <i class="fas fa-bars"></i>
     </button>
 
-    <form class="global-search d-none d-md-flex align-items-center flex-grow-0"
+    <form class="global-search topbar-search d-none d-md-flex align-items-center flex-grow-0"
         style="flex-basis: 40%; min-width: 320px; max-width: 520px;" role="search" method="GET"
         action="<?php echo e(route('billing.index')); ?>">
         <span class="search-icon">
@@ -15,12 +15,12 @@
     </form>
 
     <div
-        class="d-flex align-items-center justify-content-center flex-grow-0 flex-md-grow-0 text-muted small text-center px-3 mx-auto">
+        class="d-flex align-items-center justify-content-center flex-grow-0 flex-md-grow-0 text-muted small text-center px-3 mx-auto topbar-date">
         <span class="d-none d-md-inline"><?php echo e(now()->format('l, d M Y · h:i A')); ?></span>
         <span class="d-md-none"><?php echo e(now()->format('d M · h:i A')); ?></span>
     </div>
 
-    <div class="ms-auto d-flex align-items-center gap-2">
+    <div class="ms-auto d-flex align-items-center gap-2 topbar-actions">
         <button type="button" class="btn btn-outline-primary btn-sm d-md-none" data-bs-toggle="modal"
             data-bs-target="#globalSearchModal">
             <i class="fas fa-search"></i>
@@ -72,4 +72,5 @@
             }
         });
     </script>
-<?php $__env->stopPush(); ?><?php /**PATH /Users/gihan.finsbury/Downloads/Vet-APP/Glowup/resources/views/layouts/top_menu.blade.php ENDPATH**/ ?>
+<?php $__env->stopPush(); ?>
+<?php /**PATH /Users/gihan.finsbury/Downloads/Vet-APP/Glowup/resources/views/layouts/top_menu.blade.php ENDPATH**/ ?>

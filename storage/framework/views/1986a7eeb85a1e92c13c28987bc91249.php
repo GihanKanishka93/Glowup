@@ -7,7 +7,7 @@
     <title><?php echo e(config('app.name')); ?></title>
 
     <!-- Tell the browser to be responsive to screen width -->
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <link rel="icon" href="/img/facv.ico" type="image/x-icon">
     <link rel="stylesheet" href="<?php echo e(request()->getBasePath()); ?>/plugin/fontawesome-free/css/all.min.css" />
@@ -1412,6 +1412,7 @@
 
     <div id="wrapper">
         <?php echo $__env->make('layouts.menu', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+        <div class="mobile-sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
         <div id="content-wrapper" class="d-flex flex-column">
             <!-- Main Content -->
             <div id="content">
@@ -1651,7 +1652,57 @@
             }
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.querySelector('.sidebar');
+            const backdrop = document.querySelector('[data-sidebar-backdrop]');
+            const toggleButtons = [
+                document.getElementById('sidebarToggleTop'),
+                document.getElementById('sidebarToggle')
+            ].filter(Boolean);
+
+            const isMobileViewport = () => window.innerWidth <= 767;
+            const syncSidebarOpenClass = () => {
+                const isHidden = sidebar ? sidebar.classList.contains('toggled') : true;
+                document.body.classList.toggle('sidebar-open', !isHidden);
+            };
+
+            if (isMobileViewport() && sidebar && !sidebar.classList.contains('toggled')) {
+                sidebar.classList.add('toggled');
+                document.body.classList.add('sidebar-toggled');
+            }
+
+            syncSidebarOpenClass();
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    setTimeout(syncSidebarOpenClass, 0);
+                });
+            });
+
+            window.addEventListener('resize', () => {
+                setTimeout(syncSidebarOpenClass, 0);
+            });
+
+            if (backdrop) {
+                backdrop.addEventListener('click', function () {
+                    if (!sidebar || sidebar.classList.contains('toggled')) {
+                        return;
+                    }
+                    const sidebarToggle = toggleButtons[0] || toggleButtons[1];
+                    if (sidebarToggle) {
+                        sidebarToggle.click();
+                        return;
+                    }
+                    sidebar.classList.add('toggled');
+                    document.body.classList.add('sidebar-toggled');
+                    syncSidebarOpenClass();
+                });
+            }
+        });
+    </script>
     <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 
-</html><?php /**PATH /Users/gihan.finsbury/Downloads/Vet-APP/Glowup/resources/views/layouts/app.blade.php ENDPATH**/ ?>
+</html>
+<?php /**PATH /Users/gihan.finsbury/Downloads/Vet-APP/Glowup/resources/views/layouts/app.blade.php ENDPATH**/ ?>

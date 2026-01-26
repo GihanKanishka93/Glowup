@@ -1,7 +1,9 @@
 @extends('layouts.public')
 @section('content')
 
-    <body class="bg-gradient-login login-body">
+    <body class="login-body">
+        <!-- Dedicated Animation Backdrop (Isolated from Logo) -->
+        <div class="bg-gradient-login"></div>
         <div class="container login-container">
             <div class="row justify-content-center">
                 <div class="col-xl-11 col-lg-12">
@@ -9,8 +11,12 @@
                         <div class="row no-gutters align-items-stretch">
                             <div class="col-lg-5 d-none d-lg-flex login-visual">
                                 <div class="login-visual-overlay">
-                                    <img src="{{ asset('img/Glowup_Logo-modified.png') }}" alt="Glowup Skin Clinic"
-                                        class="login-logo mb-4">
+                                    <video class="login-logo-video mb-4" autoplay muted playsinline preload="auto"
+                                        poster="{{ asset('img/Glowup_Logo-modified.png') }}"
+                                        aria-label="Glowup Skin Clinic logo animation">
+                                        <source src="{{ asset('img/Logo_Animation_Video_Ready.mp4') }}"
+                                            type="video/mp4">
+                                    </video>
                                     <h2 class="login-visual-title">Glowup Skin Clinic</h2>
                                     <p class="login-visual-subtitle">Secure Credential Reset</p>
                                     <ul class="login-highlights list-unstyled mt-4 mb-0">
@@ -22,6 +28,10 @@
                             </div>
                             <div class="col-lg-7">
                                 <div class="p-5 login-form">
+                                    <div class="text-center mb-4 d-lg-none">
+                                        <img src="{{ asset('img/Glowup_Logo-modified.png') }}" alt="Glowup Skin Clinic"
+                                            class="login-logo">
+                                    </div>
                                     <div class="mb-4">
                                         <p class="eyebrow text-primary mb-1">Final step</p>
                                         <h1 class="login-title mb-2">Set New Password</h1>
@@ -80,8 +90,8 @@
                                     </form>
 
                                     <div class="text-center mt-4">
-                                        <a class="small font-weight-bold" href="{{ route('login') }}">
-                                            Return to login
+                                        <a class="small font-weight-bold" href="{{ url('/login') }}">
+                                            Back to sign in
                                         </a>
                                     </div>
                                 </div>

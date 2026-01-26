@@ -7,7 +7,7 @@
     <title>{{ config('app.name') }}</title>
 
     <!-- Tell the browser to be responsive to screen width -->
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="/img/facv.ico" type="image/x-icon">
     <link rel="stylesheet" href="{{ request()->getBasePath() }}/plugin/fontawesome-free/css/all.min.css" />
@@ -1413,6 +1413,7 @@
 
     <div id="wrapper">
         @include('layouts.menu')
+        <div class="mobile-sidebar-backdrop" data-sidebar-backdrop aria-hidden="true"></div>
         <div id="content-wrapper" class="d-flex flex-column">
             <!-- Main Content -->
             <div id="content">
@@ -1649,6 +1650,55 @@
             }
             if (sidebarToggleTop) {
                 sidebarToggleTop.addEventListener('click', scheduleToggleRefresh);
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.querySelector('.sidebar');
+            const backdrop = document.querySelector('[data-sidebar-backdrop]');
+            const toggleButtons = [
+                document.getElementById('sidebarToggleTop'),
+                document.getElementById('sidebarToggle')
+            ].filter(Boolean);
+
+            const isMobileViewport = () => window.innerWidth <= 767;
+            const syncSidebarOpenClass = () => {
+                const isHidden = sidebar ? sidebar.classList.contains('toggled') : true;
+                document.body.classList.toggle('sidebar-open', !isHidden);
+            };
+
+            if (isMobileViewport() && sidebar && !sidebar.classList.contains('toggled')) {
+                sidebar.classList.add('toggled');
+                document.body.classList.add('sidebar-toggled');
+            }
+
+            syncSidebarOpenClass();
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    setTimeout(syncSidebarOpenClass, 0);
+                });
+            });
+
+            window.addEventListener('resize', () => {
+                setTimeout(syncSidebarOpenClass, 0);
+            });
+
+            if (backdrop) {
+                backdrop.addEventListener('click', function () {
+                    if (!sidebar || sidebar.classList.contains('toggled')) {
+                        return;
+                    }
+                    const sidebarToggle = toggleButtons[0] || toggleButtons[1];
+                    if (sidebarToggle) {
+                        sidebarToggle.click();
+                        return;
+                    }
+                    sidebar.classList.add('toggled');
+                    document.body.classList.add('sidebar-toggled');
+                    syncSidebarOpenClass();
+                });
             }
         });
     </script>

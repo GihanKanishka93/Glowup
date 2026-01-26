@@ -6,7 +6,7 @@
     <title><?php echo e(config('app.name')); ?></title>
 
     <!-- Tell the browser to be responsive to screen width -->
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport">
 
     
     <?php
