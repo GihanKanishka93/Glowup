@@ -5,7 +5,7 @@
             box-shadow: 0 0 15px rgba(220, 53, 69, 0.4);
             animation: alert-pulse 2s infinite;
             border-radius: 12px;
-            background-color: #fff5f5;
+            background-color: rgba(220, 53, 69, 0.1);
         }
 
         @keyframes alert-pulse {

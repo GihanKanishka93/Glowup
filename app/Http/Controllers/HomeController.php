@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use App\Models\Room;
 use App\Models\Services;
 
@@ -31,12 +32,22 @@ class HomeController extends Controller
         if (Auth::user()->hasRole('Cashier')) {
             return redirect()->to('billing');
         } else {
-            $floor = Room::all(); // Simplified for now since the original code was commented out
+            $floor = [];
+            $lowStockItems = [];
             $date = $request->date ?? now()->toDateString();
 
-            $lowStockItems = Services::whereColumn('stock_quantity', '<=', 'min_stock_level')
-                ->where('min_stock_level', '>', 0)
-                ->get();
+            try {
+                if (Schema::hasTable('rooms')) {
+                    $floor = Room::all();
+                }
+                if (Schema::hasTable('services')) {
+                    $lowStockItems = Services::whereColumn('stock_quantity', '<=', 'min_stock_level')
+                        ->where('min_stock_level', '>', 0)
+                        ->get();
+                }
+            } catch (\Exception $e) {
+                // Handle case where database isn't fully migrated yet
+            }
 
             return view('home', compact('floor', 'date', 'lowStockItems'));
         }
