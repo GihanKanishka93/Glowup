@@ -357,13 +357,7 @@ class BillingController extends Controller
             'print_status' => 1
         ]);
 
-        // Load the view and generate PDF
-        set_time_limit(1200); // Increase execution time limit
-        $pdf = PDF::loadView('pdf', $data);
-        $pdf->setPaper([0, 0, 340, 900], 'portrait');
-        //$pdf->setPaper('A8', 'portrait');
-
-        return $pdf->stream('billing_details.pdf');
+        return $this->generatePdf($request->id, 'stream');
     }
 
     public function emailBill(Request $request, $id)
@@ -384,27 +378,7 @@ class BillingController extends Controller
             return 'Patient email is missing. Please add an email to send the bill.';
         }
 
-        $hospital_info = [
-            'name' => 'Glow Up Skin Care & Cosmetics',
-            'address' => 'Kottawa, Sri Lanka',
-            'phone' => '070-3843481'
-        ];
-
-        $data = [
-            'hospital_info' => $hospital_info,
-            'billing_data' => $billing,
-            'billing_items' => $billing->BillItems,
-            'date' => date('Y-m-d'),
-            'patient' => $billing->treatment->patient,
-            'treatment' => $billing->treatment,
-            'doctor' => $billing->treatment->doctor,
-            'title' => 'Billing Details',
-        ];
-
-        set_time_limit(1200);
-        $pdf = PDF::loadView('pdf', $data);
-        $pdf->setPaper([0, 0, 340, 900], 'portrait');
-        $pdfContent = $pdf->output();
+        $pdfContent = $this->generatePdf($billing->id, 'output');
 
         try {
             Mail::to($patient->email)->send(new BillEmail($billing, $pdfContent));
@@ -413,6 +387,47 @@ class BillingController extends Controller
         }
 
         return true;
+    }
+
+    public function shareBill(Request $request, $id)
+    {
+        if (!$request->hasValidSignature()) {
+            abort(403);
+        }
+
+        return $this->generatePdf($id, 'stream');
+    }
+
+    private function generatePdf($id, $mode = 'stream')
+    {
+        $billing_data = Bill::with(['treatment.patient', 'treatment.doctor', 'treatment.prescription'])->where('id', $id)->firstOrFail();
+
+        $hospital_info = [
+            'name' => 'Glow Up Skin Care & Cosmetics',
+            'address' => 'Kottawa, Sri Lanka',
+            'phone' => '070-3843481'
+        ];
+
+        $data = [
+            'hospital_info' => $hospital_info,
+            'billing_data' => $billing_data,
+            'billing_items' => $billing_data->BillItems,
+            'date' => date('Y-m-d'),
+            'patient' => $billing_data->treatment->patient,
+            'treatment' => $billing_data->treatment,
+            'doctor' => $billing_data->treatment->doctor,
+            'title' => 'Billing Details',
+        ];
+
+        set_time_limit(1200);
+        $pdf = PDF::loadView('pdf', $data);
+        $pdf->setPaper([0, 0, 340, 900], 'portrait');
+
+        if ($mode === 'stream') {
+            return $pdf->stream('billing_details.pdf');
+        } else {
+            return $pdf->output();
+        }
     }
 
     public function printPrescription(Request $request)

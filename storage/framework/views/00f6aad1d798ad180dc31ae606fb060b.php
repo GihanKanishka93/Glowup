@@ -990,6 +990,11 @@ unset($__errorArgs, $__bag); ?>
     });
 </script>
 <script>
+    $(document).ready(function () {
+        initializeDateTimePicker('.datetimepicker');
+    });
+</script>
+<script>
     document.addEventListener('DOMContentLoaded', function () {
         const billingForm = document.querySelector('.billing-workspace form');
         const savePrintButton = billingForm ? billingForm.querySelector('button[type="submit"][name="action"][value="save_and_print"]') : null;
@@ -1505,4 +1510,5 @@ unset($__errorArgs, $__bag); ?>
     });
 </script>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Users/gihan.finsbury/Downloads/Vet-APP/Glowup/resources/views/billing/create.blade.php ENDPATH**/ ?>

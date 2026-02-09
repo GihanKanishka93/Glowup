@@ -1,6 +1,5 @@
-@extends('layouts.app')
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-@section('content')
+<?php $__env->startSection('content'); ?>
 <style>
     body {
         background-color: #ffffff;
@@ -131,11 +130,11 @@ body.theme-dark .bg-gray-200 {
 </style>
     <div class="row align-items-center">
         <div class="col">
-            <h1 class="h3 mb-2 text-gray-800">Billing Information  ( ID - {{ $bill->billing_id }} )</h1>
+            <h1 class="h3 mb-2 text-gray-800">Billing Information  ( ID - <?php echo e($bill->billing_id); ?> )</h1>
         </div>
         <div class="col-auto">
-            <form action="{{ route('billing.email', $bill->id) }}" method="POST" class="d-inline">
-                @csrf
+            <form action="<?php echo e(route('billing.email', $bill->id)); ?>" method="POST" class="d-inline">
+                <?php echo csrf_field(); ?>
                 <button type="submit" class="btn btn-md btn-outline-primary btn-icon-split ml-2">
                     <span class="icon text-primary-50">
                         <i class="fa fa-envelope"></i>
@@ -143,7 +142,7 @@ body.theme-dark .bg-gray-200 {
                     <span class="text">Email Bill</span>
                 </button>
             </form>
-            @php
+            <?php
                 $whatsapp_number = $treatment->patient->whatsapp_number ?? $treatment->patient->mobile_number;
                 $whatsapp_url = '';
                 if ($whatsapp_number) {
@@ -151,16 +150,16 @@ body.theme-dark .bg-gray-200 {
                     $message = "Dear " . $treatment->patient->name . ", please find your bill here: " . $url;
                     $whatsapp_url = "https://wa.me/" . $whatsapp_number . "?text=" . urlencode($message);
                 }
-            @endphp
-            @if($whatsapp_url)
-            <a href="{{ $whatsapp_url }}" target="_blank" class="btn btn-md btn-success btn-icon-split ml-2">
+            ?>
+            <?php if($whatsapp_url): ?>
+            <a href="<?php echo e($whatsapp_url); ?>" target="_blank" class="btn btn-md btn-success btn-icon-split ml-2">
                 <span class="icon text-white-50">
                     <i class="fab fa-whatsapp"></i>
                 </span>
                 <span class="text">WhatsApp</span>
             </a>
-            @endif
-            <a href="{{ route('medical-history.show', ['id' => $treatment->patient_id]) }}" target="_blank" class="btn btn-md btn-primary btn-icon-split ml-2 medical-history-btn">
+            <?php endif; ?>
+            <a href="<?php echo e(route('medical-history.show', ['id' => $treatment->patient_id])); ?>" target="_blank" class="btn btn-md btn-primary btn-icon-split ml-2 medical-history-btn">
                 <span class="icon text-white-50">
                     <i class="fa fa-file"></i>
                 </span>
@@ -175,57 +174,58 @@ body.theme-dark .bg-gray-200 {
         <div class="col-xl-12 col-lg-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-4 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold ">Patient : {{ $treatment->patient->name }} </h6>
+                    <h6 class="m-0 font-weight-bold ">Patient : <?php echo e($treatment->patient->name); ?> </h6>
                     <div class="dropdown no-arrow show">
-                       Billing Date :  {{ $bill->billing_date }}
+                       Billing Date :  <?php echo e($bill->billing_date); ?>
+
                     </div>
                 </div>
 
 
                 <form action="" method="post" enctype="multipart/form-data">
-                    @csrf
-                    @method('post')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('post'); ?>
                     <div class="card-body">
 
                         <div class="basic-information">
                             <div class="info-row">
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>Patient Name:</strong> {{ $treatment->patient->name }}</p>
+                                    <p><strong>Patient Name:</strong> <?php echo e($treatment->patient->name); ?></p>
                                 </div>
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                     <p><strong>Doctor Name:</strong> {{ $treatment->doctor->name }}</p>
+                                     <p><strong>Doctor Name:</strong> <?php echo e($treatment->doctor->name); ?></p>
                                 </div>
                             </div>
 
                             <div class="info-row">
                                 <div class="col-xl-6 col-lg-6">
-                                    <p><strong>Patient ID:</strong> {{ $treatment->patient->patient_id }}</p>
+                                    <p><strong>Patient ID:</strong> <?php echo e($treatment->patient->patient_id); ?></p>
                                 </div>
                                 <div class="col-xl-6 col-lg-6">
-                                    <p><strong>Date of Birth:</strong> {{ $treatment->patient->date_of_birth }}</p>
+                                    <p><strong>Date of Birth:</strong> <?php echo e($treatment->patient->date_of_birth); ?></p>
                                 </div>
                             </div>
                             <div class="info-row">
                                 <div class="col-xl-6 col-lg-6">
-                                  <p><strong>Age:</strong> {{ $treatment->patient->age }}</p>
+                                  <p><strong>Age:</strong> <?php echo e($treatment->patient->age); ?></p>
                                 </div>
 
                                 <div class="col-xl-6 col-lg-6">
-                                 <p><strong>NIC:</strong> {{ $treatment->patient->nic ?? '-' }}</p>
+                                 <p><strong>NIC:</strong> <?php echo e($treatment->patient->nic ?? '-'); ?></p>
                                 </div>
 
                             </div>
                             <div class="info-row">
                                 <div class="col-xl-6 col-lg-6">
-                                <p><strong>Occupation:</strong> {{ $treatment->patient->occupation ?? '-' }}</p>
+                                <p><strong>Occupation:</strong> <?php echo e($treatment->patient->occupation ?? '-'); ?></p>
                             </div>
                                 <div class="col-xl-6 col-lg-6">
-                                <p><strong>Gender:</strong> {{ $treatment->patient->gender == 1 ? 'Male' : 'Female' }}</p>
+                                <p><strong>Gender:</strong> <?php echo e($treatment->patient->gender == 1 ? 'Male' : 'Female'); ?></p>
                             </div>
                             </div>
                             <div class="info-row">
                                 <div class="col-xl-6 col-lg-6">
-                                <p><strong>Remarks:</strong> {{ $treatment->patient->remarks }}</p>
+                                <p><strong>Remarks:</strong> <?php echo e($treatment->patient->remarks); ?></p>
                             </div>
                             </div>
                         </div>
@@ -236,19 +236,19 @@ body.theme-dark .bg-gray-200 {
                         <div class="owner-information">
                             <div class="info-row">
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>Email:</strong> {{ $treatment->patient->email }}</p>
+                                    <p><strong>Email:</strong> <?php echo e($treatment->patient->email); ?></p>
                                 </div>
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>Contact Number:</strong> {{ $treatment->patient->mobile_number }}</p>
+                                    <p><strong>Contact Number:</strong> <?php echo e($treatment->patient->mobile_number); ?></p>
                                 </div>
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>WhatsApp:</strong> {{ $treatment->patient->whatsapp_number ?? '—' }}</p>
+                                    <p><strong>WhatsApp:</strong> <?php echo e($treatment->patient->whatsapp_number ?? '—'); ?></p>
                                 </div>
                             </div>
 
                             <div class="info-row">
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>Address:</strong> {{ $treatment->patient->address }}</p>
+                                    <p><strong>Address:</strong> <?php echo e($treatment->patient->address); ?></p>
                                 </div>
                             </div>
                         </div>
@@ -260,19 +260,19 @@ body.theme-dark .bg-gray-200 {
                         <div class="trematment-info">
                             <div class="info-row">
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>History/Complaint:</strong> {{ $treatment->history_complaint }}</p>
+                                    <p><strong>History/Complaint:</strong> <?php echo e($treatment->history_complaint); ?></p>
                                 </div>
                             </div>
 
                             <div class="info-row">
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>Clinical Observation:</strong> {{ $treatment->clinical_observation }}</p>
+                                    <p><strong>Clinical Observation:</strong> <?php echo e($treatment->clinical_observation); ?></p>
                                 </div>
                             </div>
 
                             <div class="info-row">
                                 <div class="col-sm-12 col-xl-6 col-lg-6">
-                                    <p><strong>Treatment Remarks:</strong> {{ $treatment->remarks }}</p>
+                                    <p><strong>Treatment Remarks:</strong> <?php echo e($treatment->remarks); ?></p>
                                 </div>
                             </div>
                         </div>
@@ -291,14 +291,14 @@ body.theme-dark .bg-gray-200 {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($prescriptions as $prescription)
-                                    <tr id="prescription-{{ $prescription->id }}">
-                                        <td>{{ $prescription->drug_name }}</td>
-                                        <td>{{ $prescription->dosage }}</td>
-                                        <td>{{ $prescription->dose }}</td>
-                                        <td>{{ $prescription->duration }}</td>
+                                    <?php $__currentLoopData = $prescriptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $prescription): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <tr id="prescription-<?php echo e($prescription->id); ?>">
+                                        <td><?php echo e($prescription->drug_name); ?></td>
+                                        <td><?php echo e($prescription->dosage); ?></td>
+                                        <td><?php echo e($prescription->dose); ?></td>
+                                        <td><?php echo e($prescription->duration); ?></td>
                                     </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
                             </table>
 
@@ -313,20 +313,22 @@ body.theme-dark .bg-gray-200 {
                                 <div class="info-row">
                                     <div class="col-sm-12 col-xl-6 col-lg-6">
                                         <p><strong>Next Treatment Date:</strong>
-                                            @if(!empty($treatment->next_clinic_date))
-                                                {{ $treatment->next_clinic_date }}
-                                            @endif
+                                            <?php if(!empty($treatment->next_clinic_date)): ?>
+                                                <?php echo e($treatment->next_clinic_date); ?>
 
-                                            @if(!empty($treatment->next_clinic_weeks))
-                                                @if(!empty($treatment->next_clinic_weeks))
+                                            <?php endif; ?>
+
+                                            <?php if(!empty($treatment->next_clinic_weeks)): ?>
+                                                <?php if(!empty($treatment->next_clinic_weeks)): ?>
                                                     &nbsp;&nbsp; / &nbsp;&nbsp;
-                                                @endif
-                                                {{ $treatment->next_clinic_weeks }}
-                                            @endif
+                                                <?php endif; ?>
+                                                <?php echo e($treatment->next_clinic_weeks); ?>
+
+                                            <?php endif; ?>
                                         </p>
                                     </div>
                                     <div class="col-sm-12 col-xl-6 col-lg-6">
-                                         <p><strong>Billing Date:</strong> {{ $bill->billing_date }}</p>
+                                         <p><strong>Billing Date:</strong> <?php echo e($bill->billing_date); ?></p>
                                     </div>
                                 </div>
 
@@ -347,30 +349,30 @@ body.theme-dark .bg-gray-200 {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @php $total = 0; @endphp
-                                        @foreach ($billItems as $item)
-                                        <tr id="bill-item-{{ $item->id }}">
-                                            <td>{{ $item->item_name }}</td>
-                                            <td>{{ $item->item_qty }}</td>
-                                            <td>{{ $item->unit_price }}</td>
-                                            <td>{{ $item->tax }}</td>
-                                            <td>{{ $item->total_price }}</td>
-                                            @php $total += intval($item->total_price); @endphp
+                                        <?php $total = 0; ?>
+                                        <?php $__currentLoopData = $billItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <tr id="bill-item-<?php echo e($item->id); ?>">
+                                            <td><?php echo e($item->item_name); ?></td>
+                                            <td><?php echo e($item->item_qty); ?></td>
+                                            <td><?php echo e($item->unit_price); ?></td>
+                                            <td><?php echo e($item->tax); ?></td>
+                                            <td><?php echo e($item->total_price); ?></td>
+                                            <?php $total += intval($item->total_price); ?>
                                         </tr>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </tbody>
                                     <tfoot>
                                         <tr>
                                             <th colspan="4">Net Total:</th>
-                                            <td>{{ $bill->net_amount }}</td>
+                                            <td><?php echo e($bill->net_amount); ?></td>
                                         </tr>
                                         <tr>
                                             <th colspan="4">Discount:</th>
-                                            <td>{{ $bill->discount }}</td>
+                                            <td><?php echo e($bill->discount); ?></td>
                                         </tr>
                                         <tr>
                                             <th colspan="4">Grand Total:</th>
-                                            <td>{{ $bill->total }}</td>
+                                            <td><?php echo e($bill->total); ?></td>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -384,34 +386,34 @@ body.theme-dark .bg-gray-200 {
                     <div class="form-group row">
                         <div class="col-sm-2"></div>
                         <div class="col-sm-8 d-flex justify-content-sm-end custom-buttons-container">
-                            @can('bill-edit')
-                            <a href="{{ route('billing.edit', $bill->id) }}" target="_self"  class="btn btn-md btn-info btn-icon-split ml-2">
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('bill-edit')): ?>
+                            <a href="<?php echo e(route('billing.edit', $bill->id)); ?>" target="_self"  class="btn btn-md btn-info btn-icon-split ml-2">
                                 <span class="icon text-white-50">
                                     <i class="fa fa-file"></i>
                                 </span>
                                 <span class="text">Edit </span>
                             </a>
-                            @endcan
+                            <?php endif; ?>
 
-                            <a href="{{ route('billing.index') }}" class="btn btn-info">
+                            <a href="<?php echo e(route('billing.index')); ?>" class="btn btn-info">
                                 <span class="text">Cancel</span>
                             </a>
-                            @can('bill-print')
-                            <a href="{{ route('billing.print', ['id' => $bill->id]) }}" target="_blank"  class="btn btn-md btn-primary btn-icon-split ml-2">
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('bill-print')): ?>
+                            <a href="<?php echo e(route('billing.print', ['id' => $bill->id])); ?>" target="_blank"  class="btn btn-md btn-primary btn-icon-split ml-2">
                                 <span class="icon text-white-50">
                                     <i class="fa fa-print"></i>
                                 </span>
                                 <span class="text">Bill </span>
                             </a>
-                            @endcan
-                            @can('prescription-print')
-                            <a href="{{ route('billing.print-prescription', ['id' => $bill->id]) }}" target="_blank"  class="btn btn-md btn-primary btn-icon-split ml-2">
+                            <?php endif; ?>
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('prescription-print')): ?>
+                            <a href="<?php echo e(route('billing.print-prescription', ['id' => $bill->id])); ?>" target="_blank"  class="btn btn-md btn-primary btn-icon-split ml-2">
                                 <span class="icon text-white-50">
                                     <i class="fa fa-file"></i>
                                 </span>
                                 <span class="text">Prescription Print</span>
                             </a>
-                            @endcan
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -420,10 +422,10 @@ body.theme-dark .bg-gray-200 {
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('third_party_stylesheets')
-    <link rel="stylesheet" href="{{ asset('plugin/select2/select2.min.css') }}">
+<?php $__env->startSection('third_party_stylesheets'); ?>
+    <link rel="stylesheet" href="<?php echo e(asset('plugin/select2/select2.min.css')); ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.3/dist/flatpickr.min.css">
     <style>
         #moodEmoji {
@@ -431,12 +433,14 @@ body.theme-dark .bg-gray-200 {
             /* Adjust the font size as needed */
         }
     </style>
-@stop
+<?php $__env->stopSection(); ?>
 
-@section('third_party_scripts')
+<?php $__env->startSection('third_party_scripts'); ?>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.3/dist/flatpickr.min.js"></script>
 
-    <script src="{{ asset('plugin/select2/select2.min.js') }}"></script>
+    <script src="<?php echo e(asset('plugin/select2/select2.min.js')); ?>"></script>
 
 </script>
-@stop
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Users/gihan.finsbury/Downloads/Vet-APP/Glowup/resources/views/billing/show.blade.php ENDPATH**/ ?>

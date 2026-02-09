@@ -1465,6 +1465,36 @@
                 $select.select2(config);
             });
         };
+
+        window.initializeDateTimePicker = window.initializeDateTimePicker || function (selector, options) {
+            if (typeof flatpickr !== 'function') {
+                return;
+            }
+
+            var defaultOptions = {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                allowInput: true,
+                time_24hr: true
+            };
+            var config = Object.assign({}, defaultOptions, options || {});
+            var elements = typeof selector === 'string' ? document.querySelectorAll(selector) : selector;
+
+            if (!elements) {
+                return;
+            }
+
+            if (elements instanceof Element) {
+                elements = [elements];
+            }
+
+            Array.prototype.forEach.call(elements, function (element) {
+                if (element && element._flatpickr) {
+                    element._flatpickr.destroy();
+                }
+                flatpickr(element, config);
+            });
+        };
     </script>
 
     @yield('third_party_scripts')

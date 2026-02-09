@@ -137,6 +137,18 @@ class BillingDataTable extends DataTable
                         . '<i class="fas fa-envelope"></i>'
                         . '</button>'
                         . '</form>';
+
+                    // WhatsApp bill action
+                    $whatsapp_number = $item->treatment->patient->whatsapp_number ?? $item->treatment->patient->mobile_number;
+                    if ($whatsapp_number) {
+                        $url = \Illuminate\Support\Facades\URL::signedRoute('billing.share', ['id' => $item->id]);
+                        $message = "Dear " . $item->treatment->patient->name . ", please find your bill here: " . $url;
+                        $whatsapp_url = "https://wa.me/" . $whatsapp_number . "?text=" . urlencode($message);
+
+                        $btn .= '<a class="btn btn-success btn-circle btn-sm ms-1" href="' . $whatsapp_url . '" target="_blank" data-bs-toggle="tooltip" title="WhatsApp Bill">'
+                            . '<i class="fab fa-whatsapp"></i>'
+                            . '</a>';
+                    }
                 }
                 if ($user->can('prescription-print')) {
                     $btn .= '<a class="btn text-white btn-sm" href="' . route('billing.print-prescription', ['id' => $item->id]) . '" target="_blank" data-bs-toggle="tooltip" title="Print Prescription"><i title="Print Prescription" class="fas fa-file-prescription" style="color: #B197FC;"></i></a>&nbsp;';

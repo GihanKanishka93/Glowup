@@ -674,6 +674,11 @@
     });
 </script>
 <script>
+    $(document).ready(function () {
+        initializeDateTimePicker('.datetimepicker');
+    });
+</script>
+<script>
     document.addEventListener('DOMContentLoaded', function () {
         const billingForm = document.querySelector('.billing-workspace form');
         const savePrintButton = billingForm ? billingForm.querySelector('button[type="submit"][name="action"][value="save_and_print"]') : null;

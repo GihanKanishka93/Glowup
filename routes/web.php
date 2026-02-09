@@ -39,6 +39,10 @@ use Symfony\Component\HttpKernel\DataCollector\AjaxDataCollector;
 //     return view('welcome');
 // });
 
+Route::middleware(['signed'])->group(function () {
+    Route::get('/billing/share/{id}', [BillingController::class, 'shareBill'])->name('billing.share');
+});
+
 Auth::routes();
 
 
