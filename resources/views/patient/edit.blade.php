@@ -157,7 +157,7 @@
                             <div class="col-sm-8">
                                 @if($patient->before_treatment_image)
                                     <div class="mb-2">
-                                        <img src="{{ asset('storage/' . $patient->before_treatment_image) }}" alt="Before treatment"
+                                        <img src="{{ asset($patient->before_treatment_image) }}" alt="Before treatment"
                                             class="img-thumbnail" style="max-height: 180px;">
                                     </div>
                                 @endif
@@ -176,7 +176,7 @@
                             <div class="col-sm-8">
                                 @if($patient->after_treatment_image)
                                     <div class="mb-2">
-                                        <img src="{{ asset('storage/' . $patient->after_treatment_image) }}" alt="After treatment"
+                                        <img src="{{ asset($patient->after_treatment_image) }}" alt="After treatment"
                                             class="img-thumbnail" style="max-height: 180px;">
                                     </div>
                                 @endif

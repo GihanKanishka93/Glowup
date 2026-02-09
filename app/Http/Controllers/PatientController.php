@@ -6,7 +6,6 @@ use App\Models\Patient;
 use Illuminate\Http\Request;
 use App\DataTables\PatientDataTable;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PatientController extends Controller
@@ -115,7 +114,7 @@ class PatientController extends Controller
 
         if ($request->hasFile('before_treatment_image')) {
             if ($patient->before_treatment_image) {
-                Storage::disk('public')->delete($patient->before_treatment_image);
+                $this->deletePublicTreatmentImage($patient->before_treatment_image);
             }
             $patient->before_treatment_image = $this->storeTreatmentImage(
                 $request->file('before_treatment_image'),
@@ -126,7 +125,7 @@ class PatientController extends Controller
 
         if ($request->hasFile('after_treatment_image')) {
             if ($patient->after_treatment_image) {
-                Storage::disk('public')->delete($patient->after_treatment_image);
+                $this->deletePublicTreatmentImage($patient->after_treatment_image);
             }
             $patient->after_treatment_image = $this->storeTreatmentImage(
                 $request->file('after_treatment_image'),
@@ -186,8 +185,29 @@ class PatientController extends Controller
 
         $extension = $file->getClientOriginalExtension();
         $filename = 'patient_' . $patientId . '_' . $label . '_' . now()->format('YmdHis') . '_' . Str::random(6) . '.' . $extension;
+        $relativePath = 'patient-treatments/' . $filename;
+        $destination = public_path($relativePath);
 
-        return $file->storeAs('patient-treatments', $filename, 'public');
+        $directory = dirname($destination);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        $file->move($directory, $filename);
+
+        return $relativePath;
+    }
+
+    private function deletePublicTreatmentImage(?string $relativePath): void
+    {
+        if (!$relativePath) {
+            return;
+        }
+
+        $fullPath = public_path($relativePath);
+        if (is_file($fullPath)) {
+            @unlink($fullPath);
+        }
     }
 
     public function destroy($id)

@@ -144,7 +144,7 @@
                                             <div class="col-md-6">
                                                 <p class="text-muted small mb-2">Before Treatment</p>
                                                 @if($patient->before_treatment_image)
-                                                    <img src="{{ asset('storage/' . $patient->before_treatment_image) }}"
+                                                    <img src="{{ asset($patient->before_treatment_image) }}"
                                                         alt="Before treatment" class="img-fluid rounded border">
                                                 @else
                                                     <p class="text-muted mb-0">No image uploaded.</p>
@@ -153,7 +153,7 @@
                                             <div class="col-md-6">
                                                 <p class="text-muted small mb-2">After Treatment</p>
                                                 @if($patient->after_treatment_image)
-                                                    <img src="{{ asset('storage/' . $patient->after_treatment_image) }}"
+                                                    <img src="{{ asset($patient->after_treatment_image) }}"
                                                         alt="After treatment" class="img-fluid rounded border">
                                                 @else
                                                     <p class="text-muted mb-0">No image uploaded.</p>
