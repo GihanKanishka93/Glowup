@@ -15,7 +15,7 @@
                     </div>
                     <div></div>
                 </div>
-                <form method="post" action="{{ route('patient.update',$patient->id) }}">
+                <form method="post" action="{{ route('patient.update',$patient->id) }}" enctype="multipart/form-data">
                     @csrf
                     @method('put')
                     <div class="card-body">
@@ -142,6 +142,47 @@
                                 <textarea class="form-control @error('remarks') is-invalid @enderror" 
                                     name="remarks" placeholder="Any other notes...">{{ old('remarks', $patient->remarks) }}</textarea>
                                 @error('remarks')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <hr>
+                        <legend>Treatment Images</legend>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2">Before Treatment</label>
+                            <div class="col-sm-8">
+                                @if($patient->before_treatment_image)
+                                    <div class="mb-2">
+                                        <img src="{{ asset('storage/' . $patient->before_treatment_image) }}" alt="Before treatment"
+                                            class="img-thumbnail" style="max-height: 180px;">
+                                    </div>
+                                @endif
+                                <input type="file" class="form-control @error('before_treatment_image') is-invalid @enderror"
+                                    name="before_treatment_image" accept="image/*">
+                                @error('before_treatment_image')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2">After Treatment</label>
+                            <div class="col-sm-8">
+                                @if($patient->after_treatment_image)
+                                    <div class="mb-2">
+                                        <img src="{{ asset('storage/' . $patient->after_treatment_image) }}" alt="After treatment"
+                                            class="img-thumbnail" style="max-height: 180px;">
+                                    </div>
+                                @endif
+                                <input type="file" class="form-control @error('after_treatment_image') is-invalid @enderror"
+                                    name="after_treatment_image" accept="image/*">
+                                @error('after_treatment_image')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>

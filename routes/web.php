@@ -67,6 +67,8 @@ Route::group(['middleware' => ['auth']], function () {
 
 
     Route::resource('patient', \App\Http\Controllers\PatientController::class);
+    Route::post('patient/{patient}/treatment-images', [\App\Http\Controllers\PatientController::class, 'updateTreatmentImages'])
+        ->name('patient.treatment-images');
     Route::resource('billing', BillingController::class);
     Route::post('billing/save-client-details', [BillingController::class, 'saveClientDetails'])->name('billing.save-client-details');
     Route::post('billing/{id}/email', [BillingController::class, 'emailBill'])->name('billing.email');

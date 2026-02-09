@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use App\DataTables\PatientDataTable;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PatientController extends Controller
 {
@@ -34,6 +37,8 @@ class PatientController extends Controller
             'basic_ilness' => 'nullable|string',
             'surgical_history' => 'nullable|string',
             'remarks' => 'nullable|string',
+            'before_treatment_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'after_treatment_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
         $maxId = Patient::max('id');
@@ -42,8 +47,17 @@ class PatientController extends Controller
 
         $patient = new Patient();
         $patient->patient_id = $generatedId;
-        $patient->fill($request->all());
+        $patient->fill(Arr::except($validated, ['before_treatment_image', 'after_treatment_image']));
         $patient->save();
+
+        $beforePath = $this->storeTreatmentImage($request->file('before_treatment_image'), $patient->id, 'before');
+        $afterPath = $this->storeTreatmentImage($request->file('after_treatment_image'), $patient->id, 'after');
+
+        if ($beforePath || $afterPath) {
+            $patient->before_treatment_image = $beforePath ?: $patient->before_treatment_image;
+            $patient->after_treatment_image = $afterPath ?: $patient->after_treatment_image;
+            $patient->save();
+        }
 
         return redirect()->route('patient.index')->with('message', 'Client registered successfully.');
     }
@@ -93,12 +107,87 @@ class PatientController extends Controller
             'basic_ilness' => 'nullable|string',
             'surgical_history' => 'nullable|string',
             'remarks' => 'nullable|string',
+            'before_treatment_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'after_treatment_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
-        $patient->fill($request->all());
+        $patient->fill(Arr::except($validated, ['before_treatment_image', 'after_treatment_image']));
+
+        if ($request->hasFile('before_treatment_image')) {
+            if ($patient->before_treatment_image) {
+                Storage::disk('public')->delete($patient->before_treatment_image);
+            }
+            $patient->before_treatment_image = $this->storeTreatmentImage(
+                $request->file('before_treatment_image'),
+                $patient->id,
+                'before'
+            );
+        }
+
+        if ($request->hasFile('after_treatment_image')) {
+            if ($patient->after_treatment_image) {
+                Storage::disk('public')->delete($patient->after_treatment_image);
+            }
+            $patient->after_treatment_image = $this->storeTreatmentImage(
+                $request->file('after_treatment_image'),
+                $patient->id,
+                'after'
+            );
+        }
+
         $patient->save();
 
         return redirect()->route('patient.index')->with('message', 'Client updated successfully.');
+    }
+
+    public function updateTreatmentImages(Request $request, Patient $patient)
+    {
+        $validated = $request->validate([
+            'before_treatment_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'after_treatment_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+        ]);
+
+        if (!$request->hasFile('before_treatment_image') && !$request->hasFile('after_treatment_image')) {
+            return redirect()->back()->with('danger', 'Please select at least one image to upload.');
+        }
+
+        if ($request->hasFile('before_treatment_image')) {
+            if ($patient->before_treatment_image) {
+                Storage::disk('public')->delete($patient->before_treatment_image);
+            }
+            $patient->before_treatment_image = $this->storeTreatmentImage(
+                $request->file('before_treatment_image'),
+                $patient->id,
+                'before'
+            );
+        }
+
+        if ($request->hasFile('after_treatment_image')) {
+            if ($patient->after_treatment_image) {
+                Storage::disk('public')->delete($patient->after_treatment_image);
+            }
+            $patient->after_treatment_image = $this->storeTreatmentImage(
+                $request->file('after_treatment_image'),
+                $patient->id,
+                'after'
+            );
+        }
+
+        $patient->save();
+
+        return redirect()->back()->with('message', 'Treatment images updated.');
+    }
+
+    private function storeTreatmentImage($file, int $patientId, string $label): ?string
+    {
+        if (!$file) {
+            return null;
+        }
+
+        $extension = $file->getClientOriginalExtension();
+        $filename = 'patient_' . $patientId . '_' . $label . '_' . now()->format('YmdHis') . '_' . Str::random(6) . '.' . $extension;
+
+        return $file->storeAs('patient-treatments', $filename, 'public');
     }
 
     public function destroy($id)

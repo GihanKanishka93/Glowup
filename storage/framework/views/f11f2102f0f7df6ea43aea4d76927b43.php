@@ -1,5 +1,4 @@
-@extends('layouts.app')
-@section('content')
+<?php $__env->startSection('content'); ?>
 
     <h1 class="h3 mb-2 text-gray-800">
     </h1>
@@ -9,14 +8,14 @@
             <div class="col-12">
                 <div class="card shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <a href="{{ route('patient.index') }}" class="btn btn-outline-primary btn-sm">
+                        <a href="<?php echo e(route('patient.index')); ?>" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-arrow-left me-1"></i> Back
                         </a>
                         <div class="d-flex align-items-center gap-3">
                             <span class="badge bg-secondary">Registered
-                                {{ optional($patient->created_at)->format('d M Y') ?? '—' }}</span>
+                                <?php echo e(optional($patient->created_at)->format('d M Y') ?? '—'); ?></span>
                             <span class="badge bg-info text-dark">Last Update
-                                {{ optional($patient->updated_at)->diffForHumans() ?? '—' }}</span>
+                                <?php echo e(optional($patient->updated_at)->diffForHumans() ?? '—'); ?></span>
                         </div>
                     </div>
                     <div class="card-body">
@@ -29,29 +28,29 @@
                                     <div class="card-body">
                                         <dl class="row mb-0 small">
                                             <dt class="col-5 text-muted">Client ID</dt>
-                                            <dd class="col-7 fw-semibold">{{ $patient->patient_id }}</dd>
+                                            <dd class="col-7 fw-semibold"><?php echo e($patient->patient_id); ?></dd>
 
                                             <dt class="col-5 text-muted">Name</dt>
-                                            <dd class="col-7 fw-semibold text-capitalize">{{ $patient->name }}</dd>
+                                            <dd class="col-7 fw-semibold text-capitalize"><?php echo e($patient->name); ?></dd>
 
                                             <dt class="col-5 text-muted">Gender</dt>
                                             <dd class="col-7 text-capitalize">
-                                                {{ $patient->gender == 1 ? 'Male' : 'Female' }}</dd>
+                                                <?php echo e($patient->gender == 1 ? 'Male' : 'Female'); ?></dd>
 
                                             <dt class="col-5 text-muted">Date of Birth</dt>
                                             <dd class="col-7">
-                                                {{ optional($patient->date_of_birth)->format('d M Y') ?? '—' }}</dd>
+                                                <?php echo e(optional($patient->date_of_birth)->format('d M Y') ?? '—'); ?></dd>
 
                                             <dt class="col-5 text-muted">Age at Register</dt>
-                                            <dd class="col-7">{{ $patient->age_at_register ?? '—' }}</dd>
+                                            <dd class="col-7"><?php echo e($patient->age_at_register ?? '—'); ?></dd>
 
                                             <!--
                                         <dt class="col-5 text-muted">Current Age</dt>
-                                        <dd class="col-7">{{ $patient->current_age ?? '—' }}</dd>
+                                        <dd class="col-7"><?php echo e($patient->current_age ?? '—'); ?></dd>
                                         -->
 
                                             <dt class="col-5 text-muted">Remarks</dt>
-                                            <dd class="col-7">{{ $patient->remarks ?: 'None recorded' }}</dd>
+                                            <dd class="col-7"><?php echo e($patient->remarks ?: 'None recorded'); ?></dd>
                                         </dl>
                                     </div>
                                 </div>
@@ -65,19 +64,19 @@
                                     <div class="card-body">
                                         <dl class="row mb-0 small">
                                             <dt class="col-5 text-muted">Mobile</dt>
-                                            <dd class="col-7">{{ $patient->mobile_number ?? '—' }}</dd>
+                                            <dd class="col-7"><?php echo e($patient->mobile_number ?? '—'); ?></dd>
 
                                             <dt class="col-5 text-muted">WhatsApp</dt>
-                                            <dd class="col-7">{{ $patient->whatsapp_number ?? '—' }}</dd>
+                                            <dd class="col-7"><?php echo e($patient->whatsapp_number ?? '—'); ?></dd>
 
                                             <dt class="col-5 text-muted">Email</dt>
-                                            <dd class="col-7">{{ $patient->email ?? '—' }}</dd>
+                                            <dd class="col-7"><?php echo e($patient->email ?? '—'); ?></dd>
 
                                             <dt class="col-5 text-muted">National ID</dt>
-                                            <dd class="col-7">{{ $patient->nic ?? '—' }}</dd>
+                                            <dd class="col-7"><?php echo e($patient->nic ?? '—'); ?></dd>
 
                                             <dt class="col-5 text-muted">Address</dt>
-                                            <dd class="col-7">{{ $patient->address ?? '—' }}</dd>
+                                            <dd class="col-7"><?php echo e($patient->address ?? '—'); ?></dd>
                                         </dl>
                                     </div>
                                 </div>
@@ -88,20 +87,20 @@
                                     <div
                                         class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
                                         <h5 class="mb-0">Quick Facts</h5>
-                                        @can('patient-edit')
-                                            <a href="{{ route('patient.edit', $patient->id) }}"
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('patient-edit')): ?>
+                                            <a href="<?php echo e(route('patient.edit', $patient->id)); ?>"
                                                 class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-edit me-1"></i>Edit
                                             </a>
-                                        @endcan
+                                        <?php endif; ?>
                                     </div>
                                     <div class="card-body small">
                                         <ul class="list-unstyled mb-3">
                                             <li class="d-flex justify-content-between mb-2">
                                                 <span class="text-muted">Treatments to date</span>
-                                                <strong>{{ $treatments->count() }}</strong>
+                                                <strong><?php echo e($treatments->count()); ?></strong>
                                             </li>
-                                            @php
+                                            <?php
                                                 $lastVisit = $treatments->first();
                                                 $lastVisitDate = $lastVisit && $lastVisit->treatment_date
                                                     ? \Carbon\Carbon::parse($lastVisit->treatment_date)->format('d M Y')
@@ -109,24 +108,25 @@
                                                 $nextVaccinationLabel = $nextVaccination ? ($nextVaccination->next_vacc_date
                                                     ? \Carbon\Carbon::parse($nextVaccination->next_vacc_date)->format('d M Y')
                                                     : null) : null;
-                                            @endphp
+                                            ?>
                                             <li class="d-flex justify-content-between mb-2">
                                                 <span class="text-muted">Last Visit</span>
-                                                <strong>{{ $lastVisitDate }}</strong>
+                                                <strong><?php echo e($lastVisitDate); ?></strong>
                                             </li>
                                             <li class="d-flex justify-content-between">
                                                 <span class="text-muted">Outstanding Bills</span>
-                                                <strong>{{ $outstandingBills }}</strong>
+                                                <strong><?php echo e($outstandingBills); ?></strong>
                                             </li>
                                         </ul>
                                         <div class="alert alert-info py-2 px-3 mb-0">
                                             <small class="mb-0 d-block"><strong>Next Follow-up</strong></small>
                                             <small class="text-muted">
-                                                @if($nextFollowUp)
-                                                    {{ $nextFollowUp->next_clinic_date }}
-                                                @else
+                                                <?php if($nextFollowUp): ?>
+                                                    <?php echo e($nextFollowUp->next_clinic_date); ?>
+
+                                                <?php else: ?>
                                                     No follow-up session scheduled
-                                                @endif
+                                                <?php endif; ?>
                                             </small>
                                         </div>
                                     </div>
@@ -143,50 +143,78 @@
                                         <div class="row g-3">
                                             <div class="col-md-6">
                                                 <p class="text-muted small mb-2">Before Treatment</p>
-                                                @if($patient->before_treatment_image)
-                                                    <img src="{{ asset('storage/' . $patient->before_treatment_image) }}"
+                                                <?php if($patient->before_treatment_image): ?>
+                                                    <img src="<?php echo e(asset('storage/' . $patient->before_treatment_image)); ?>"
                                                         alt="Before treatment" class="img-fluid rounded border">
-                                                @else
+                                                <?php else: ?>
                                                     <p class="text-muted mb-0">No image uploaded.</p>
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
                                             <div class="col-md-6">
                                                 <p class="text-muted small mb-2">After Treatment</p>
-                                                @if($patient->after_treatment_image)
-                                                    <img src="{{ asset('storage/' . $patient->after_treatment_image) }}"
+                                                <?php if($patient->after_treatment_image): ?>
+                                                    <img src="<?php echo e(asset('storage/' . $patient->after_treatment_image)); ?>"
                                                         alt="After treatment" class="img-fluid rounded border">
-                                                @else
+                                                <?php else: ?>
                                                     <p class="text-muted mb-0">No image uploaded.</p>
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
                                         </div>
-                                        @can('patient-edit')
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('patient-edit')): ?>
                                             <hr>
-                                            <form method="post" action="{{ route('patient.treatment-images', $patient->id) }}"
+                                            <form method="post" action="<?php echo e(route('patient.treatment-images', $patient->id)); ?>"
                                                 enctype="multipart/form-data">
-                                                @csrf
+                                                <?php echo csrf_field(); ?>
                                                 <div class="row g-3 align-items-end">
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Update Before Image</label>
                                                         <input type="file"
-                                                            class="form-control @error('before_treatment_image') is-invalid @enderror"
+                                                            class="form-control <?php $__errorArgs = ['before_treatment_image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
                                                             name="before_treatment_image" accept="image/*">
-                                                        @error('before_treatment_image')
+                                                        <?php $__errorArgs = ['before_treatment_image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                                             <div class="invalid-feedback">
-                                                                <strong>{{ $message }}</strong>
+                                                                <strong><?php echo e($message); ?></strong>
                                                             </div>
-                                                        @enderror
+                                                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Add/Update After Image</label>
                                                         <input type="file"
-                                                            class="form-control @error('after_treatment_image') is-invalid @enderror"
+                                                            class="form-control <?php $__errorArgs = ['after_treatment_image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
                                                             name="after_treatment_image" accept="image/*">
-                                                        @error('after_treatment_image')
+                                                        <?php $__errorArgs = ['after_treatment_image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                                             <div class="invalid-feedback">
-                                                                <strong>{{ $message }}</strong>
+                                                                <strong><?php echo e($message); ?></strong>
                                                             </div>
-                                                        @enderror
+                                                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                                     </div>
                                                     <div class="col-12 d-flex justify-content-end">
                                                         <button type="submit" class="btn btn-primary btn-sm">
@@ -195,7 +223,7 @@
                                                     </div>
                                                 </div>
                                             </form>
-                                        @endcan
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
@@ -210,7 +238,7 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Treatment History</h5>
-                        <a href="{{ route('billing.index', ['search' => $patient->patient_id]) }}"
+                        <a href="<?php echo e(route('billing.index', ['search' => $patient->patient_id])); ?>"
                             class="btn btn-sm btn-outline-secondary">View Related Bills</a>
                     </div>
                     <div class="card-body p-0">
@@ -227,33 +255,34 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($treatments as $treatment)
+                                    <?php $__empty_1 = true; $__currentLoopData = $treatments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $treatment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                         <tr>
-                                            <td>{{ $treatment->treatment_date ? \Carbon\Carbon::parse($treatment->treatment_date)->format('d M Y') : '—' }}
+                                            <td><?php echo e($treatment->treatment_date ? \Carbon\Carbon::parse($treatment->treatment_date)->format('d M Y') : '—'); ?>
+
                                             </td>
-                                            <td>{{ optional($treatment->doctor)->name ?? '—' }}</td>
-                                            <td>{{ $treatment->history_complaint ?: '—' }}</td>
-                                            <td>{{ $treatment->clinical_observation ?: '—' }}</td>
-                                            <td>{{ $treatment->remarks ?: '—' }}</td>
+                                            <td><?php echo e(optional($treatment->doctor)->name ?? '—'); ?></td>
+                                            <td><?php echo e($treatment->history_complaint ?: '—'); ?></td>
+                                            <td><?php echo e($treatment->clinical_observation ?: '—'); ?></td>
+                                            <td><?php echo e($treatment->remarks ?: '—'); ?></td>
                                             <td class="text-end">
-                                                <a href="{{ route('billing.show', $treatment->bill->id ?? 0) }}"
-                                                    class="btn btn-outline-primary btn-sm" @if(!optional($treatment->bill)->id)
-                                                    disabled @endif>
+                                                <a href="<?php echo e(route('billing.show', $treatment->bill->id ?? 0)); ?>"
+                                                    class="btn btn-outline-primary btn-sm" <?php if(!optional($treatment->bill)->id): ?>
+                                                    disabled <?php endif; ?>>
                                                     <i class="fas fa-receipt me-1"></i>Bill
                                                 </a>
-                                                @if($treatment->id)
-                                                    <a href="{{ route('medical-history.show', ['id' => $patient->id]) }}"
+                                                <?php if($treatment->id): ?>
+                                                    <a href="<?php echo e(route('medical-history.show', ['id' => $patient->id])); ?>"
                                                         target="_blank" class="btn btn-outline-secondary btn-sm">
                                                         <i class="fas fa-notes-medical"></i>
                                                     </a>
-                                                @endif
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
-                                    @empty
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                         <tr>
                                             <td colspan="6" class="text-center text-muted py-4">No treatments recorded yet.</td>
                                         </tr>
-                                    @endforelse
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -262,9 +291,9 @@
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         .pet-profile {
             color: var(--text-primary);
@@ -381,4 +410,6 @@
             box-shadow: var(--shadow-sm) !important;
         }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Users/gihan.finsbury/Downloads/Vet-APP/Glowup/resources/views/patient/show.blade.php ENDPATH**/ ?>

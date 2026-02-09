@@ -9,7 +9,7 @@
                     <div class="dropdown no-arrow show">
                     </div>
                 </div>
-                <form action="<?php echo e(route('patient.store')); ?>" method="post">
+                <form action="<?php echo e(route('patient.store')); ?>" method="post" enctype="multipart/form-data">
                     <?php echo csrf_field(); ?>
                     <?php echo method_field('post'); ?>
                     <div class="card-body">
@@ -385,6 +385,43 @@ endif;
 unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
+
+                        <hr>
+                        <legend>Treatment Images</legend>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2">Before Treatment</label>
+                            <div class="col-sm-8">
+                                <input type="file" class="form-control <?php $__errorArgs = ['before_treatment_image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                    name="before_treatment_image" accept="image/*">
+                                <?php $__errorArgs = ['before_treatment_image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong><?php echo e($message); ?></strong>
+                                    </span>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-8">
+                                <small class="text-muted">You can add the after image from the client profile later.</small>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group row">
@@ -472,4 +509,5 @@ unset($__errorArgs, $__bag); ?>
     });
 </script>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Users/gihan.finsbury/Downloads/Vet-APP/Glowup/resources/views/patient/create.blade.php ENDPATH**/ ?>

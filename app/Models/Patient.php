@@ -24,6 +24,8 @@ class Patient extends Model
         'occupation',
         'referral_source',
         'photo',
+        'before_treatment_image',
+        'after_treatment_image',
         'gender',
         'date_of_birth',
         'age_at_register',

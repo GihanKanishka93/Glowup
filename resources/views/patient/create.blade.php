@@ -11,7 +11,7 @@
                     <div class="dropdown no-arrow show">
                     </div>
                 </div>
-                <form action="{{ route('patient.store') }}" method="post">
+                <form action="{{ route('patient.store') }}" method="post" enctype="multipart/form-data">
                     @csrf
                     @method('post')
                     <div class="card-body">
@@ -203,6 +203,29 @@
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror
+                            </div>
+                        </div>
+
+                        <hr>
+                        <legend>Treatment Images</legend>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2">Before Treatment</label>
+                            <div class="col-sm-8">
+                                <input type="file" class="form-control @error('before_treatment_image') is-invalid @enderror"
+                                    name="before_treatment_image" accept="image/*">
+                                @error('before_treatment_image')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-8">
+                                <small class="text-muted">You can add the after image from the client profile later.</small>
                             </div>
                         </div>
                     </div>
