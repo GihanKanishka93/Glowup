@@ -18,7 +18,6 @@ class BillingDataTable extends DataTable
 {
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
-        $hasVaccinationInfoTable = Schema::hasTable('vaccination_infos');
         $searchParam = request()->input('search');
         if (is_array($searchParam)) {
             $searchValue = trim((string) ($searchParam['value'] ?? ''));
@@ -27,12 +26,14 @@ class BillingDataTable extends DataTable
         }
 
         return (new EloquentDataTable($query))
-            ->filter(function ($query) use ($searchValue, $hasVaccinationInfoTable) {
+            ->filter(function ($query) use ($searchValue) {
                 if (!$searchValue) {
                     return;
                 }
 
-                $query->where(function ($q) use ($searchValue) {
+                $hasVaccinationInfoTable = Schema::hasTable('vaccination_infos');
+
+                $query->where(function ($q) use ($searchValue, $hasVaccinationInfoTable) {
                     $q->whereHas('treatment.patient', function ($q) use ($searchValue) {
                         $q->where('name', 'like', '%' . $searchValue . '%')
                             ->whereNull('patients.deleted_at'); // Exclude soft-deleted patients
