@@ -25,6 +25,62 @@
                 box-shadow: 0 0 10px rgba(220, 53, 69, 0.4);
             }
         }
+
+        .billing-image-preview {
+            cursor: pointer;
+        }
+
+        .billing-image-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1055;
+        }
+
+        .billing-image-modal.is-open {
+            display: flex;
+        }
+
+        .billing-image-modal__backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+        }
+
+        .billing-image-modal__dialog {
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px;
+            max-width: min(90vw, 980px);
+            max-height: 90vh;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.35);
+            z-index: 1;
+        }
+
+        .billing-image-modal__image {
+            display: block;
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+        }
+
+        .billing-image-modal__close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.85);
+            color: #fff;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+        }
     </style>
     <div class="billing-dashboard container-fluid">
         <div class="row g-4 align-items-start billing-grid">
@@ -34,6 +90,8 @@
                 @include('billing.partials.stock-alerts')
 
                 @include('billing.partials.recent-bills')
+
+                @include('billing.partials.patient-treatment-images')
             </div>
             <div class="col-12 col-xl-8 col-xxl-9 workspace-column">
                 <div class="card shadow-sm billing-workspace">
@@ -795,6 +853,101 @@
     //         });
     //     });
 
+    function updateBillingTreatmentImages(data) {
+        var container = document.getElementById('billing-treatment-images');
+        if (!container) {
+            return;
+        }
+
+        var baseUrl = (container.dataset.baseUrl || '').replace(/\/$/, '');
+
+        function resolveUrl(path) {
+            if (!path) {
+                return null;
+            }
+            if (path.startsWith('http://') || path.startsWith('https://')) {
+                return path;
+            }
+            if (path.startsWith('/')) {
+                return window.location.origin + path;
+            }
+            if (!baseUrl) {
+                return '/' + path;
+            }
+            return baseUrl + '/' + path.replace(/^\/+/, '');
+        }
+
+        function applyImage(imgId, placeholderId, path) {
+            var img = document.getElementById(imgId);
+            var placeholder = document.getElementById(placeholderId);
+            if (!img || !placeholder) {
+                return;
+            }
+            var url = resolveUrl(path);
+            if (url) {
+                img.src = url;
+                img.classList.remove('d-none');
+                placeholder.classList.add('d-none');
+            } else {
+                img.src = '';
+                img.classList.add('d-none');
+                placeholder.classList.remove('d-none');
+            }
+        }
+
+        applyImage('billingBeforeImage', 'billingBeforePlaceholder', data ? data.before_treatment_image : null);
+        applyImage('billingAfterImage', 'billingAfterPlaceholder', data ? data.after_treatment_image : null);
+    }
+
+    function initializeBillingImageModal() {
+        var modal = document.getElementById('billingImageModal');
+        var modalImage = document.getElementById('billingImageModalImg');
+        if (!modal || !modalImage) {
+            return;
+        }
+
+        function openModal(src, altText) {
+            if (!src) {
+                return;
+            }
+            modalImage.src = src;
+            modalImage.alt = altText || 'Treatment image preview';
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeModal() {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            modalImage.src = '';
+        }
+
+        ['billingBeforeImage', 'billingAfterImage'].forEach(function (id) {
+            var img = document.getElementById(id);
+            if (!img) {
+                return;
+            }
+            img.addEventListener('click', function () {
+                if (img.classList.contains('d-none') || !img.src) {
+                    return;
+                }
+                openModal(img.src, img.alt);
+            });
+        });
+
+        modal.addEventListener('click', function (event) {
+            if (event.target.matches('[data-modal-close]')) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    }
+
     function getPatientDetails() {
         var patient = $('#patient').val();
         var medicalHistoryBtn = document.querySelector('.medical-history-btn');
@@ -866,11 +1019,14 @@
                         window.updateBillingSummaryCard();
                     }
 
+                    updateBillingTreatmentImages(response);
                 },
                 error: function (xhr, status, error) {
                     console.log(error);
                 }
             });
+        } else {
+            updateBillingTreatmentImages(null);
         }
     }
 
@@ -888,6 +1044,10 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
+        if (document.getElementById('patient')?.value) {
+            getPatientDetails();
+        }
+        initializeBillingImageModal();
         const savePatientDetailsBtn = document.getElementById('savePatientDetailsBtn');
         const patientSelect = document.getElementById('patient');
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');

@@ -144,7 +144,7 @@
                                             <div class="col-md-6">
                                                 <p class="text-muted small mb-2">Before Treatment</p>
                                                 <?php if($patient->before_treatment_image): ?>
-                                                    <img src="<?php echo e(asset('storage/' . $patient->before_treatment_image)); ?>"
+                                                    <img src="<?php echo e(asset($patient->before_treatment_image)); ?>"
                                                         alt="Before treatment" class="img-fluid rounded border">
                                                 <?php else: ?>
                                                     <p class="text-muted mb-0">No image uploaded.</p>
@@ -153,7 +153,7 @@
                                             <div class="col-md-6">
                                                 <p class="text-muted small mb-2">After Treatment</p>
                                                 <?php if($patient->after_treatment_image): ?>
-                                                    <img src="<?php echo e(asset('storage/' . $patient->after_treatment_image)); ?>"
+                                                    <img src="<?php echo e(asset($patient->after_treatment_image)); ?>"
                                                         alt="After treatment" class="img-fluid rounded border">
                                                 <?php else: ?>
                                                     <p class="text-muted mb-0">No image uploaded.</p>
