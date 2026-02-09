@@ -22,7 +22,7 @@ return new class extends Migration
         Schema::create('reminder_logs', function (Blueprint $table) {
             $table->id();
             $table->string('reminder_type'); // vaccination | next_clinic
-            $table->unsignedBigInteger('pet_id')->nullable();
+            $table->unsignedBigInteger('patient_id')->nullable();
             $table->unsignedBigInteger('treatment_id')->nullable();
             $table->unsignedBigInteger('vaccination_info_id')->nullable();
             $table->string('owner_email')->nullable();

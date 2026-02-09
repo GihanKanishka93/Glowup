@@ -7,6 +7,7 @@ use App\Models\Treatment;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Button;
@@ -17,6 +18,7 @@ class BillingDataTable extends DataTable
 {
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        $hasVaccinationInfoTable = Schema::hasTable('vaccination_infos');
         $searchParam = request()->input('search');
         if (is_array($searchParam)) {
             $searchValue = trim((string) ($searchParam['value'] ?? ''));
@@ -25,7 +27,7 @@ class BillingDataTable extends DataTable
         }
 
         return (new EloquentDataTable($query))
-            ->filter(function ($query) use ($searchValue) {
+            ->filter(function ($query) use ($searchValue, $hasVaccinationInfoTable) {
                 if (!$searchValue) {
                     return;
                 }
@@ -58,17 +60,19 @@ class BillingDataTable extends DataTable
                                     });
                             });
                         })
-                        ->orWhereExists(function ($sub) use ($searchValue) {
-                            // Match vaccination names tied to the treatment
-                            $sub->select(DB::raw(1))
-                                ->from('vaccination_infos as vi')
-                                ->join('vaccinations as v', function ($join) {
-                                $join->on('v.id', '=', 'vi.vaccine_id')
-                                    ->whereNull('v.deleted_at');
-                            })
-                                ->whereNull('vi.deleted_at')
-                                ->whereColumn('vi.trement_id', 'bills.treatment_id')
-                                ->where('v.name', 'like', '%' . $searchValue . '%');
+                        ->when($hasVaccinationInfoTable, function ($q) use ($searchValue) {
+                            $q->orWhereExists(function ($sub) use ($searchValue) {
+                                // Match vaccination names tied to the treatment (legacy table)
+                                $sub->select(DB::raw(1))
+                                    ->from('vaccination_infos as vi')
+                                    ->join('vaccinations as v', function ($join) {
+                                        $join->on('v.id', '=', 'vi.vaccine_id')
+                                            ->whereNull('v.deleted_at');
+                                    })
+                                    ->whereNull('vi.deleted_at')
+                                    ->whereColumn('vi.trement_id', 'bills.treatment_id')
+                                    ->where('v.name', 'like', '%' . $searchValue . '%');
+                            });
                         });
                 });
             })
