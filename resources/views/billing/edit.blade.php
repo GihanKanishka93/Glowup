@@ -89,22 +89,20 @@ footer.sticky-footer .copyright {
     cursor: pointer;
 }
 
-    <style>
-        .pulsing-alert {
-            border: 2px solid #dc3545;
-            box-shadow: 0 0 15px rgba(220, 53, 69, 0.4);
-            animation: alert-pulse 2s infinite;
-            border-radius: 12px;
-            background-color: rgba(220, 53, 69, 0.15);
-            color: #ffffff !important;
-        }
+    .pulsing-alert {
+        border: 2px solid #dc3545;
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.4);
+        animation: alert-pulse 2s infinite;
+        border-radius: 12px;
+        background-color: rgba(220, 53, 69, 0.15);
+        color: #ffffff !important;
+    }
 
-        @keyframes alert-pulse {
-            0% { border-color: #dc3545; box-shadow: 0 0 10px rgba(220, 53, 69, 0.4); }
-            50% { border-color: #ffc107; box-shadow: 0 0 25px rgba(255, 193, 7, 0.6); }
-            100% { border-color: #dc3545; box-shadow: 0 0 10px rgba(220, 53, 69, 0.4); }
-        }
-    </style>
+    @keyframes alert-pulse {
+        0% { border-color: #dc3545; box-shadow: 0 0 10px rgba(220, 53, 69, 0.4); }
+        50% { border-color: #ffc107; box-shadow: 0 0 25px rgba(255, 193, 7, 0.6); }
+        100% { border-color: #dc3545; box-shadow: 0 0 10px rgba(220, 53, 69, 0.4); }
+    }
 #duration-weeks .radio-button span {
     padding: 7px 5px;
     background-color: #656363; /* Button background */
