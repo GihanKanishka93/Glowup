@@ -3,98 +3,83 @@
 @section('content')
 <style>
     .select2-container {
-    width: 100% !important;
-}
- .form-group input {
-    border-radius: 30px !important;
- }
- #addVaccination, #addPrescription, #addService {
-    margin-top: 3px;
- }
- #wrapper #content-wrapper #content {
-    background-image: url("../img/background.jpg") !important;
-    background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Do not repeat the image */
-  background-size: cover; /* Resize the background image to cover the entire container */
-  color: #fff !important;
- }
- #wrapper #content-wrapper {
-    background-color: #230049;
-    width: 100%;
-    overflow-x: hidden;
-}
- .card-body {
-    background-color: transparent !important;
-    background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Do not repeat the image */
-  background-size: cover; /* Resize the background image to cover the entire container */
-  color: #fff !important;
-}
-.card-header {
-    padding: .75rem 1.25rem;
-    margin-bottom: 0;
-    background-color: #f5ecff00 !important;
-    border-bottom: 0px solid #e3e6f0 !important;
-}
-.card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    word-wrap: break-word;
-    background-color: #7b7ab700 !important;
-    background-clip: border-box;
-    border: 0px solid #e3e6f000 !important;
-    border-radius: .35rem;
-}
-.bg-gray-200 {
-    background-color: #1e88e5 !important;
-    color: #ffffff !important;
-    border-radius: 8px;
-}
-.text-gray-800{
-    color:#fff!important
-}
-.form-group label,
-.col-form-label,
-legend {
-    color: #e5e7eb !important;
-}
-.bg-gradient-primary {
-    background-color: #1c0442;
-    background-image: none !important;
-    background-size: none !important;
-}
-footer.sticky-footer {
-    background-color: #1c0442 !important;
-}
-footer.sticky-footer .copyright {
-    color:#fff !important;
-}
-.text-center {
-    text-align: center !important;
-}
+        width: 100% !important;
+    }
 
-/* durationweeks button */
-#duration-weeks label {
-    margin-right: 2px;
-}
-.radio-button-group {
-    display: flex;
-    gap: 10px; /* Adjust the gap to add space between the buttons */
-    justify-content: flex-start; /* Align buttons to the left */
-}
+    .billing-edit-page {
+        color: var(--text-primary);
+    }
 
-#duration-weeks .radio-button {
-    position: relative;
-    display: inline-block;
-}
+    .billing-edit-page .form-group input,
+    .billing-edit-page .form-group textarea,
+    .billing-edit-page .form-group select {
+        border-radius: .75rem !important;
+    }
 
-#duration-weeks .radio-button input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-}
+    #addVaccination,
+    #addPrescription,
+    #addService {
+        margin-top: 3px;
+    }
+
+    .billing-edit-page .card {
+        background-color: var(--surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: .75rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .billing-edit-page .card-header {
+        padding: .75rem 1.25rem;
+        margin-bottom: 0;
+        background-color: transparent !important;
+        border-bottom: 1px solid var(--border) !important;
+    }
+
+    .billing-edit-page .card-body {
+        background-color: transparent !important;
+        color: var(--text-primary) !important;
+    }
+
+    .billing-edit-page .text-gray-800 {
+        color: var(--text-primary) !important;
+    }
+
+    .billing-edit-page .form-group label,
+    .billing-edit-page .col-form-label,
+    .billing-edit-page legend {
+        color: var(--text-primary) !important;
+    }
+
+    .billing-edit-page .bg-gray-200 {
+        background-color: var(--surface-alt) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border);
+        border-radius: .5rem;
+        font-weight: 600;
+    }
+
+    /* duration weeks button */
+    #duration-weeks label {
+        margin-right: 2px;
+    }
+
+    .radio-button-group {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-start;
+    }
+
+    #duration-weeks .radio-button {
+        position: relative;
+        display: inline-block;
+    }
+
+    #duration-weeks .radio-button input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
 
     .pulsing-alert {
         border: 2px solid #dc3545;
@@ -110,26 +95,34 @@ footer.sticky-footer .copyright {
         50% { border-color: #ffc107; box-shadow: 0 0 25px rgba(255, 193, 7, 0.6); }
         100% { border-color: #dc3545; box-shadow: 0 0 10px rgba(220, 53, 69, 0.4); }
     }
-#duration-weeks .radio-button span {
-    padding: 7px 5px;
-    background-color: #656363; /* Button background */
-    border: 1px solid #ccc; /* Border style */
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+    #duration-weeks .radio-button span {
+        padding: 7px 8px;
+        background-color: var(--surface-alt);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+        color: var(--text-primary);
+    }
 
-#duration-weeks .radio-button input[type="radio"]:checked + span {
-    background-color: #007bff; /* Background when selected */
-    color: white; /* Text color when selected */
-    border-color: #007bff; /* Border color when selected */
-}
+    #duration-weeks .radio-button input[type="radio"]:checked+span {
+        background-color: var(--primary);
+        color: var(--primary-contrast);
+        border-color: var(--primary);
+    }
 
-#duration-weeks .radio-button span:hover {
-    background-color: #e0e0e0; /* Hover effect */
-}
+    #duration-weeks .radio-button span:hover {
+        border-color: var(--primary);
+    }
+
+    body.theme-dark .billing-edit-page .bg-gray-200 {
+        background-color: rgba(99, 102, 241, 0.16) !important;
+        border-color: rgba(99, 102, 241, 0.4);
+        color: var(--text-primary) !important;
+    }
 
 </style>
+<div class="billing-edit-page">
 <div class="row align-items-center">
     <div class="col">
         <h1 class="h3 mb-2 text-gray-800">Update Bill ( Bill ID - {{ $bill->billing_id }})</h1>
@@ -539,7 +532,7 @@ footer.sticky-footer .copyright {
                                         </select>
                                     </div>
                                     <div class="col-md-1 d-flex align-items-center gap-2 flex-nowrap prescription-actions">
-                                        <button type="button" style="background-color: #578b26" class="btn btn-sm text-white btn-icon-split" id="addPrescription">
+                                        <button type="button" class="btn btn-sm btn-success btn-icon-split" id="addPrescription">
                                             <span class="icon text-white-50">
                                                 <i class="fa fa-plus"></i>
                                             </span>
@@ -686,7 +679,7 @@ footer.sticky-footer .copyright {
                 <input type="text" class="form-control" name="last_price[]" placeholder="">
             </div>
             <div class="col-md-1 d-flex align-items-center gap-2 flex-nowrap service-actions">
-                <button type="button" style="background-color: #578b26" class="btn btn-sm text-white btn-icon-split" id="addService">
+                <button type="button" class="btn btn-sm btn-success btn-icon-split" id="addService">
                     <span class="icon text-white-50">
                         <i class="fa fa-plus"></i>
                     </span>
@@ -794,6 +787,7 @@ footer.sticky-footer .copyright {
             </div>
         </div>
     </div>
+</div>
 @endsection
 
 @section('third_party_stylesheets')
