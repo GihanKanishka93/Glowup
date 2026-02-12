@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Jobs;
+
+use App\Mail\BillEmail;
+use App\Models\Bill;
+use App\Services\BillPdfService;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+
+class SendBillEmailJob implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries = 3;
+    public int $timeout = 180;
+
+    public function __construct(private readonly int $billId)
+    {
+    }
+
+    public function handle(BillPdfService $billPdfService): void
+    {
+        $bill = Bill::with(['treatment.patient', 'treatment.doctor', 'BillItems'])->find($this->billId);
+        $patient = $bill?->treatment?->patient;
+
+        if (!$bill || !$patient || empty($patient->email)) {
+            return;
+        }
+
+        $pdfContent = $billPdfService->output($bill->id);
+        Mail::to($patient->email)->send(new BillEmail($bill, $pdfContent));
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('SendBillEmailJob failed', [
+            'bill_id' => $this->billId,
+            'error' => $exception->getMessage(),
+        ]);
+    }
+}

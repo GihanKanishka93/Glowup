@@ -12,7 +12,7 @@
                     </div>
                     <div></div>
                 </div>
-                <form method="post" action="<?php echo e(route('patient.update',$patient->id)); ?>">
+                <form method="post" action="<?php echo e(route('patient.update',$patient->id)); ?>" enctype="multipart/form-data">
                     <?php echo csrf_field(); ?>
                     <?php echo method_field('put'); ?>
                     <div class="card-body">
@@ -258,6 +258,75 @@ endif;
 unset($__errorArgs, $__bag); ?>" 
                                     name="remarks" placeholder="Any other notes..."><?php echo e(old('remarks', $patient->remarks)); ?></textarea>
                                 <?php $__errorArgs = ['remarks'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong><?php echo e($message); ?></strong>
+                                    </span>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <legend>Treatment Images</legend>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2">Before Treatment</label>
+                            <div class="col-sm-8">
+                                <?php if($patient->before_treatment_image): ?>
+                                    <div class="mb-2">
+                                        <img src="<?php echo e(asset($patient->before_treatment_image)); ?>" alt="Before treatment"
+                                            class="img-thumbnail" style="max-height: 180px;">
+                                    </div>
+                                <?php endif; ?>
+                                <input type="file" class="form-control <?php $__errorArgs = ['before_treatment_image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                    name="before_treatment_image" accept="image/*">
+                                <?php $__errorArgs = ['before_treatment_image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong><?php echo e($message); ?></strong>
+                                    </span>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-2">After Treatment</label>
+                            <div class="col-sm-8">
+                                <?php if($patient->after_treatment_image): ?>
+                                    <div class="mb-2">
+                                        <img src="<?php echo e(asset($patient->after_treatment_image)); ?>" alt="After treatment"
+                                            class="img-thumbnail" style="max-height: 180px;">
+                                    </div>
+                                <?php endif; ?>
+                                <input type="file" class="form-control <?php $__errorArgs = ['after_treatment_image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                    name="after_treatment_image" accept="image/*">
+                                <?php $__errorArgs = ['after_treatment_image'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }

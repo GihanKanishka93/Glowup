@@ -22,15 +22,19 @@ use App\DataTables\billingDataTable;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Dose;
 use App\Services\BillingService;
+use App\Services\BillPdfService;
+use App\Jobs\SendBillEmailJob;
 use App\Mail\NextClinicReminderMail;
 use App\Models\ReminderLog;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\BillEmail;
-use PDF;  // Use this alias if configured in aliases array
+use PDF;
 
 class BillingController extends Controller
 {
-    public function __construct(private readonly BillingService $billingService)
+    public function __construct(
+        private readonly BillingService $billingService,
+        private readonly BillPdfService $billPdfService
+    )
     {
     }
 
@@ -200,7 +204,7 @@ class BillingController extends Controller
             if ($result !== true) {
                 return redirect()->route('billing.show', $billing->id)->with('danger', $result);
             }
-            return redirect()->route('billing.show', $billing->id)->with('message', 'Successfully saved and emailed the bill');
+            return redirect()->route('billing.show', $billing->id)->with('message', 'Successfully saved. Bill email is queued and will be sent shortly.');
         }
 
         return redirect()->route('billing.show', $billing->id)->with('message', 'Successfully completed');
@@ -367,7 +371,7 @@ class BillingController extends Controller
         if ($result !== true) {
             return redirect()->back()->with('danger', $result);
         }
-        return redirect()->back()->with('message', 'Bill emailed to owner.');
+        return redirect()->back()->with('message', 'Bill email queued. It will be sent shortly.');
     }
 
     private function emailBillInternal(Bill $billing): bool|string
@@ -378,12 +382,10 @@ class BillingController extends Controller
             return 'Patient email is missing. Please add an email to send the bill.';
         }
 
-        $pdfContent = $this->generatePdf($billing->id, 'output');
-
         try {
-            Mail::to($patient->email)->send(new BillEmail($billing, $pdfContent));
+            SendBillEmailJob::dispatch($billing->id)->onQueue('emails');
         } catch (\Throwable $e) {
-            return 'Failed to send email: ' . $e->getMessage();
+            return 'Failed to queue bill email: ' . $e->getMessage();
         }
 
         return true;
@@ -400,33 +402,10 @@ class BillingController extends Controller
 
     private function generatePdf($id, $mode = 'stream')
     {
-        $billing_data = Bill::with(['treatment.patient', 'treatment.doctor', 'treatment.prescription'])->where('id', $id)->firstOrFail();
-
-        $hospital_info = [
-            'name' => 'Glow Up Skin Care & Cosmetics',
-            'address' => 'Kottawa, Sri Lanka',
-            'phone' => '070-3843481'
-        ];
-
-        $data = [
-            'hospital_info' => $hospital_info,
-            'billing_data' => $billing_data,
-            'billing_items' => $billing_data->BillItems,
-            'date' => date('Y-m-d'),
-            'patient' => $billing_data->treatment->patient,
-            'treatment' => $billing_data->treatment,
-            'doctor' => $billing_data->treatment->doctor,
-            'title' => 'Billing Details',
-        ];
-
-        set_time_limit(1200);
-        $pdf = PDF::loadView('pdf', $data);
-        $pdf->setPaper([0, 0, 340, 900], 'portrait');
-
         if ($mode === 'stream') {
-            return $pdf->stream('billing_details.pdf');
+            return $this->billPdfService->stream((int) $id, 'billing_details.pdf');
         } else {
-            return $pdf->output();
+            return $this->billPdfService->output((int) $id);
         }
     }
 
