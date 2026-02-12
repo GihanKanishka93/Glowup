@@ -48,10 +48,17 @@
     border-radius: .35rem;
 }
 .bg-gray-200 {
-    background-color: #008001 !important;
+    background-color: #1e88e5 !important;
+    color: #ffffff !important;
+    border-radius: 8px;
 }
 .text-gray-800{
     color:#fff!important
+}
+.form-group label,
+.col-form-label,
+legend {
+    color: #e5e7eb !important;
 }
 .bg-gradient-primary {
     background-color: #1c0442;
