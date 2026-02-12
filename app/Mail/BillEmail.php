@@ -27,7 +27,7 @@ class BillEmail extends Mailable
             ->with([
                 'bill' => $this->bill,
                 'treatment' => $this->bill->treatment,
-                'pet' => $this->bill->treatment->pet ?? null,
+                'patient' => $this->bill->treatment?->patient,
                 'clinicName' => $clinicName,
             ])
             ->attachData($this->pdfContent, "bill-{$this->bill->billing_id}.pdf", [

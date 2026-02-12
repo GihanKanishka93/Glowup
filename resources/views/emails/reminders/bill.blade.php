@@ -5,13 +5,13 @@
     <title>Invoice {{ $bill->billing_id }}</title>
 </head>
 <body style="font-family: Arial, sans-serif; color: #1f2937;">
-    <h2 style="margin-bottom: 12px;">Hi {{ $pet->owner_name ?? 'there' }},</h2>
+    <h2 style="margin-bottom: 12px;">Hi {{ $patient->name ?? 'there' }},</h2>
     <p style="margin-top: 0;">Thank you for visiting {{ $clinicName }}. Attached is your skincare invoice.</p>
 
     <p style="margin: 12px 0 0 0;">
         Bill ID: <strong>{{ $bill->billing_id }}</strong><br>
         Billing Date: <strong>{{ $bill->billing_date }}</strong><br>
-        Client: <strong>{{ $pet->name ?? 'N/A' }}</strong><br>
+        Client: <strong>{{ $patient->name ?? 'N/A' }}</strong><br>
         Doctor: <strong>{{ $treatment->doctor->name ?? 'N/A' }}</strong>
     </p>
 
