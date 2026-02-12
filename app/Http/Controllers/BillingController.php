@@ -314,6 +314,11 @@ class BillingController extends Controller
         $durationtypes = DurationTypes::all();
         $durationweeks = DurationWeeks::all();
 
+        $bill = Bill::findOrFail($bid);
+        $treatment = Treatment::with(['patient', 'doctor'])->findOrFail($bill->treatment_id);
+        $billItems = BillItem::where('bill_id', $bill->id)->get();
+        $prescriptions = Prescription::where('trement_id', $bill->treatment_id)->get();
+
         $lowStockItems = Services::whereColumn('stock_quantity', '<=', 'min_stock_level')
             ->where('min_stock_level', '>', 0)
             ->get();
