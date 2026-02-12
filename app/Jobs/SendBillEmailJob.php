@@ -19,9 +19,11 @@ class SendBillEmailJob implements ShouldQueue
 
     public int $tries = 3;
     public int $timeout = 180;
+    public int $billId;
 
-    public function __construct(private readonly int $billId)
+    public function __construct(int $billId)
     {
+        $this->billId = $billId;
     }
 
     public function handle(BillPdfService $billPdfService): void

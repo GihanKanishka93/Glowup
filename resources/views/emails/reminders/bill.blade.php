@@ -12,7 +12,7 @@
         Bill ID: <strong>{{ $bill->billing_id }}</strong><br>
         Billing Date: <strong>{{ $bill->billing_date }}</strong><br>
         Client: <strong>{{ $patient->name ?? 'N/A' }}</strong><br>
-        Doctor: <strong>{{ $treatment->doctor->name ?? 'N/A' }}</strong>
+        Doctor: <strong>{{ optional($treatment->doctor)->name ?? 'N/A' }}</strong>
     </p>
 
     <p style="margin: 16px 0 0 0;">If you have any questions about this bill, please contact us.</p>

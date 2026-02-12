@@ -40,7 +40,9 @@ class BillPdfService
             'title' => 'Billing Details',
         ];
 
-        set_time_limit(1200);
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(1200);
+        }
         $pdf = PDF::loadView('pdf', $data);
         $pdf->setPaper([0, 0, 340, 900], 'portrait');
 
