@@ -126,17 +126,17 @@
                     </tr>
                     <tr>
                         <td width="100%">
-                            <p><strong>Patient ID:</strong> {{ $patient->patient_id ?? '' }} </p>
+                            <p><strong>Patient ID:</strong> {{ optional($patient)->patient_id ?? '' }} </p>
                         </td>
                     </tr>
                     <tr>
                         <td width="100%">
-                            <p><strong>Patient Name:</strong> {{ $patient->name ?? 'N/A' }}</p>
+                            <p><strong>Patient Name:</strong> {{ optional($patient)->name ?? 'N/A' }}</p>
                         </td>
                     </tr>
                     <tr>
                         <td width="100%">
-                            <p><strong>Doctor:</strong> {{ $doctor->name ?? 'N/A' }}</p>
+                            <p><strong>Doctor:</strong> {{ optional($doctor)->name ?? 'N/A' }}</p>
                         </td>
                     </tr>
                 </tbody>
@@ -211,7 +211,7 @@
             <p>Thank you for trusting <strong>Glow Up Skin Care &amp; Cosmetics</strong> with your skincare journey!</p>
             <!-- Bottom Section for User's Name -->
             <div class="mt-5">
-                <p class="text-right"><strong>Prepared by:</strong> {{ Auth::user()->first_name }}</p>
+                <p class="text-right"><strong>Prepared by:</strong> {{ optional(Auth::user())->first_name ?? optional($doctor)->name ?? config('app.name') }}</p>
             </div>
         </div>
     </div>
